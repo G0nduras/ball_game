@@ -1,20 +1,33 @@
 import sys
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QLabel
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 
 
-class CircleWidget(QWidget):
+class CircleWidget(QMainWindow, QWidget):
     def __init__(self):
         super().__init__()
+        self._x = 200
+        self._y = 200
 
-    def paintEvent(self, e):
+    def paintEvent(self, event):
         painter = QPainter(self)
         pen = QPen()
         pen.setWidth(2)
         painter.setPen(pen)
         painter.setBrush(QBrush(QColor("red"), Qt.BrushStyle.SolidPattern))
-        painter.drawEllipse(200, 200, 100, 100)
+        painter.drawEllipse(self._x, self._y, 100, 100)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Left:
+            self._x -= 10
+        elif event.key() == Qt.Key.Key_Right:
+            self._x += 10
+        elif event.key() == Qt.Key.Key_Up:
+            self._y -= 10
+        elif event.key() == Qt.Key.Key_Down:
+            self._y += 10
+        self.update()
 
 
 def main():
