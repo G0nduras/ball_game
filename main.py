@@ -1,10 +1,10 @@
 import sys
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QLabel
+from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 
 
-class CircleWidget(QMainWindow, QWidget):
+class CircleWidget(QWidget):
     def __init__(self):
         super().__init__()
         self._x = 200
@@ -27,6 +27,14 @@ class CircleWidget(QMainWindow, QWidget):
             self._y -= 10
         elif event.key() == Qt.Key.Key_Down:
             self._y += 10
+        if self._x > 400:
+            self._x = 400
+        elif self._x < 0:
+            self._x = 0
+        elif self._y > 400:
+            self._y = 400
+        elif self._y < 0:
+            self._y = 0
         self.update()
 
 
