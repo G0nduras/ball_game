@@ -5,44 +5,65 @@ from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 
 
 class CircleWidget(QWidget):
-    def __init__(self):
+    def __init__(self, width: float, height: float, circle_radius: float, circle_color: str, step: float):
         super().__init__()
-        self._x = 200
-        self._y = 200
+        self._width: float = width
+        self._height: float = height
+        self._x: float = height / 2 - circle_radius
+        self._y: float = width / 2 - circle_radius
+        self._circle_radius: float = circle_radius
+        self._circle_color: str = circle_color
+        self._step: float = step
 
     def paintEvent(self, event):
         painter = QPainter(self)
         pen = QPen()
         pen.setWidth(2)
         painter.setPen(pen)
-        painter.setBrush(QBrush(QColor("red"), Qt.BrushStyle.SolidPattern))
-        painter.drawEllipse(self._x, self._y, 100, 100)
+        painter.setBrush(QBrush(QColor(self._circle_color), Qt.BrushStyle.SolidPattern))
+        painter.drawEllipse(self._x, self._y, self._circle_radius * 2, self._circle_radius * 2)
+
+    def _compute_next_x_y(self, event):
+        x = self._x
+        y = self._y
+        if event.key() == Qt.Key.Key_Left:
+            x -= self._step
+        elif event.key() == Qt.Key.Key_Right:
+            x += self._step
+        elif event.key() == Qt.Key.Key_Up:
+            y -= self._step
+        elif event.key() == Qt.Key.Key_Down:
+            y += self._step
+        return x, y
+
+    def _is_out_of_range(self, x: float, y: float):
+        max_x = self._height - 2 * self._circle_radius
+        max_y = self._width - 2 * self._circle_radius
+        return (x < 0) or (y < 0) or (x > max_x) or (y > max_y)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_Left:
-            self._x -= 10
-        elif event.key() == Qt.Key.Key_Right:
-            self._x += 10
-        elif event.key() == Qt.Key.Key_Up:
-            self._y -= 10
-        elif event.key() == Qt.Key.Key_Down:
-            self._y += 10
-        if self._x > 400:
-            self._x = 400
-        elif self._x < 0:
-            self._x = 0
-        elif self._y > 400:
-            self._y = 400
-        elif self._y < 0:
-            self._y = 0
-        self.update()
+        new_x, new_y = self._compute_next_x_y(event=event)
+        if not self._is_out_of_range(x=new_x, y=new_y):
+            self._x = new_x
+            self._y = new_y
+            self.update()
+
+
+WINDOW_WIDTH = 500
+WINDOW_HEIGHT = 500
 
 
 def main():
     app = QApplication(sys.argv)
-    widget = CircleWidget()
+    widget = CircleWidget(
+        width=WINDOW_WIDTH,
+        height=WINDOW_HEIGHT,
+        circle_radius=50,
+        circle_color="red",
+        step=10,
+    )
     widget.setWindowTitle("BallGame")
-    widget.setFixedSize(QSize(500, 500))
+    widget.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
     widget.show()
     sys.exit(app.exec())
 
