@@ -1,11 +1,19 @@
 import sys
-from PyQt6.QtCore import QSize, Qt
+from typing import Optional
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 
 
 class CircleWidget(QWidget):
-    def __init__(self, width: float, height: float, circle_radius: float, circle_color: str, step: float):
+    def __init__(
+            self,
+            width: float,
+            height: float,
+            circle_radius: float,
+            circle_color: str,
+            step: float,
+    ):
         super().__init__()
         self._width: float = width
         self._height: float = height
@@ -14,6 +22,8 @@ class CircleWidget(QWidget):
         self._circle_radius: float = circle_radius
         self._circle_color: str = circle_color
         self._step: float = step
+        self._x_mouse_position: Optional[float] = None
+        self._y_mouse_position: Optional[float] = None
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -21,7 +31,12 @@ class CircleWidget(QWidget):
         pen.setWidth(2)
         painter.setPen(pen)
         painter.setBrush(QBrush(QColor(self._circle_color), Qt.BrushStyle.SolidPattern))
-        painter.drawEllipse(self._x, self._y, self._circle_radius * 2, self._circle_radius * 2)
+        painter.drawEllipse(
+            round(self._x),
+            round(self._y),
+            round(self._circle_radius * 2),
+            round(self._circle_radius * 2),
+        )
 
     def _compute_next_x_y(self, event):
         x = self._x
@@ -48,6 +63,15 @@ class CircleWidget(QWidget):
             self._y = new_y
             self.update()
 
+    def mouseMoveEvent(self, event):
+        x_mouse_position = event.pos().x()
+        y_mouse_position = event.pos().y()
+
+    def mousePressEvent(self, event):
+        self._x = event.pos().x() - self._circle_radius
+        self._y = event.pos().y() - self._circle_radius
+        self.update()
+
 
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
@@ -64,6 +88,7 @@ def main():
     )
     widget.setWindowTitle("BallGame")
     widget.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+    widget.setMouseTracking(True)
     widget.show()
     sys.exit(app.exec())
 
