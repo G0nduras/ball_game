@@ -12,6 +12,7 @@ class CircleWidget(QWidget):
             height: float,
             circle_radius: float,
             circle_color: str,
+            hover_circle_color: str,
             step: float,
     ):
         super().__init__()
@@ -21,16 +22,17 @@ class CircleWidget(QWidget):
         self._y: float = width / 2 - circle_radius
         self._circle_radius: float = circle_radius
         self._circle_color: str = circle_color
+        self._hover_circle_color = hover_circle_color
         self._step: float = step
-        self._x_mouse_position: Optional[float] = None
-        self._y_mouse_position: Optional[float] = None
+        self._mouse_position_x: Optional[float] = None
+        self._mouse_position_y: Optional[float] = None
 
     def paintEvent(self, event):
         painter = QPainter(self)
         pen = QPen()
         pen.setWidth(2)
         painter.setPen(pen)
-        painter.setBrush(QBrush(QColor(self._circle_color), Qt.BrushStyle.SolidPattern))
+        painter.setBrush(QBrush(QColor(self._get_circle_color()), Qt.BrushStyle.SolidPattern))
         painter.drawEllipse(
             round(self._x),
             round(self._y),
@@ -63,9 +65,27 @@ class CircleWidget(QWidget):
             self._y = new_y
             self.update()
 
+    def _get_circle_center(self):
+        return self._x + self._circle_radius, self._y + self._circle_radius
+
+    def _get_circle_color(self):
+        if self._mouse_position_x is None:
+            return self._circle_color
+
+        circle_center_x, circle_center_y = self._get_circle_center()
+        square_distance = (circle_center_x - self._mouse_position_x) ** 2 + (circle_center_y - self._mouse_position_y) ** 2
+        if square_distance < self._circle_radius ** 2:
+            return self._hover_circle_color
+        else:
+            return self._circle_color
+
     def mouseMoveEvent(self, event):
-        x_mouse_position = event.pos().x()
-        y_mouse_position = event.pos().y()
+        color_before = self._get_circle_color()
+        self._mouse_position_x = event.pos().x()
+        self._mouse_position_y = event.pos().y()
+        color_after = self._get_circle_color()
+        if color_before != color_after:
+            self.update()
 
     def mousePressEvent(self, event):
         self._x = event.pos().x() - self._circle_radius
@@ -84,6 +104,7 @@ def main():
         height=WINDOW_HEIGHT,
         circle_radius=50,
         circle_color="red",
+        hover_circle_color="green",
         step=10,
     )
     widget.setWindowTitle("BallGame")
