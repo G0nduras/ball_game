@@ -18,58 +18,37 @@ class BallWidget(QWidget):
         self._width: float = width
         self._height: float = height
         self._step: float = step
-        self._center_target: Optional[QPointF] = None
         self._mouse_position: Optional[QPointF] = None
         self.timer = QTimer()
-        self.timer.timeout.connect(self._one_timer_tick)
+        self.timer.timeout.connect(self.one_timer_tick)
         self.timer.start(round(1000 / frame_per_second))
         self._balls: list = balls
+        self._select_ball = None
 
     def paintEvent(self, event):
         painter = QPainter(self)
         for ball in self._balls:
             ball.draw(painter=painter, mouse_position=self._mouse_position)
 
-    def calculate_shift1(self, event) -> QPointF:
-        delta = QPointF(0, 0)
-        if event.key() == Qt.Key.Key_Left:
-            delta = QPointF(-self._step, 0)
-        elif event.key() == Qt.Key.Key_Right:
-            delta = QPointF(self._step, 0)
-        elif event.key() == Qt.Key.Key_Up:
-            delta = QPointF(0, -self._step)
-        elif event.key() == Qt.Key.Key_Down:
-            delta = QPointF(0, self._step)
-        return delta
-
-#    def _is_out_of_range(self, position: QPointF) -> bool:
- #       max_x = self._height - 2 * self._circle_radius
-  #      max_y = self._width - 2 * self._circle_radius
-   #     x = position.x()
-    #    y = position.y()
-     #   return (x < 0) or (y < 0) or (x > max_x) or (y > max_y)
-
-    def keyPressEvent(self, event):
-        self._center_target = None
-        shift = self.calculate_shift1(event)
-        for ball in self._balls:
-            ball.move(shift)
-        self.update()
-
     def mouseMoveEvent(self, event):
         self._mouse_position = QPointF(event.pos())
         self.update()
 
     def mousePressEvent(self, event):
-        self._center_target = QPointF(event.pos())
-        self.update()
-
-    def _one_timer_tick(self):
-        if self._center_target is not None:
+        if event.buttons() == Qt.MouseButton.RightButton:
             for ball in self._balls:
-                shift = ball.calculate_shift2(self._center_target)
-                ball.move(shift)
-            self.update()
+                if ball.is_clicked(mouse_position=QPointF(event.pos())):
+                    self._select_ball = ball
+
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            if self._select_ball is not None:
+                self._select_ball.set_center_target(center_target=QPointF(event.pos()))
+
+    def one_timer_tick(self):
+        for ball in self._balls:
+            shift = ball.calculate_shift2()
+            ball.move(shift)
+        self.update()
 
 
 class Ball:
@@ -87,6 +66,10 @@ class Ball:
         self._hover_color = hover_color
         self._circle_radius = circle_radius
         self._speed = speed
+        self._center_target: Optional[QPointF] = None
+
+    def set_center_target(self, center_target: QPointF):
+        self._center_target = center_target
 
     def draw(self, painter: QPainter, mouse_position: QPointF):
         pen = QPen()
@@ -112,14 +95,19 @@ class Ball:
     def move(self, shift: QPointF):
         self._center_position += shift
 
-    def calculate_shift2(self, center_target: QPointF) -> QPointF:
-        assert isinstance(center_target, QPointF), type(center_target)
-        from_ball_to_target = QVector2D(center_target - self._center_position)
+    def calculate_shift2(self) -> QPointF:
+        if self._center_target is None:
+            return QPointF(0, 0)
+        from_ball_to_target = QVector2D(self._center_target - self._center_position)
         if from_ball_to_target.length() < self._speed:
-            return center_target - self._center_position
+            return self._center_target - self._center_position
         else:
             move_direction = from_ball_to_target.normalized()
             return move_direction.toPointF() * self._speed
+
+    def is_clicked(self, mouse_position: QPointF) -> bool:
+        vector = QVector2D(self._center_position - mouse_position)
+        return vector.length() <= self._circle_radius
 
 
 WINDOW_WIDTH = 500
