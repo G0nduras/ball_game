@@ -1,127 +1,125 @@
 import sys
 from typing import Optional
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QPointF
 from PyQt6.QtWidgets import QApplication, QWidget
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
 
 
-class CircleWidget(QWidget):
+class BallWidget(QWidget):
     def __init__(
             self,
             width: float,
             height: float,
-            circle_radius: float,
-            circle_color: str,
-            hover_circle_color: str,
             step: float,
-            speed: float,
+            frame_per_second: int,
+            balls: list,
     ):
         super().__init__()
         self._width: float = width
         self._height: float = height
-        self._x: float = height / 2 - circle_radius
-        self._y: float = width / 2 - circle_radius
-        self._circle_radius: float = circle_radius
-        self._circle_color: str = circle_color
-        self._hover_circle_color = hover_circle_color
         self._step: float = step
-        self._mouse_position_x: Optional[float] = None
-        self._mouse_position_y: Optional[float] = None
-        self._last_mouse_click_x: Optional[float] = None
-        self._last_mouse_click_y: Optional[float] = None
-        self._speed = speed
+        self._center_target: Optional[QPointF] = None
+        self._mouse_position: Optional[QPointF] = None
         self.timer = QTimer()
         self.timer.timeout.connect(self._one_timer_tick)
-        self.timer.start(10)
+        self.timer.start(round(1000 / frame_per_second))
+        self._balls: list = balls
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        pen = QPen()
-        pen.setWidth(2)
-        painter.setPen(pen)
-        painter.setBrush(QBrush(QColor(self._get_circle_color()), Qt.BrushStyle.SolidPattern))
-        painter.drawEllipse(
-            round(self._x),
-            round(self._y),
-            round(self._circle_radius * 2),
-            round(self._circle_radius * 2),
-        )
+        for ball in self._balls:
+            ball.draw(painter=painter, mouse_position=self._mouse_position)
 
-    def _compute_next_x_y(self, event):
-        x = self._x
-        y = self._y
+    def calculate_shift1(self, event) -> QPointF:
+        delta = QPointF(0, 0)
         if event.key() == Qt.Key.Key_Left:
-            x -= self._step
+            delta = QPointF(-self._step, 0)
         elif event.key() == Qt.Key.Key_Right:
-            x += self._step
+            delta = QPointF(self._step, 0)
         elif event.key() == Qt.Key.Key_Up:
-            y -= self._step
+            delta = QPointF(0, -self._step)
         elif event.key() == Qt.Key.Key_Down:
-            y += self._step
-        return x, y
+            delta = QPointF(0, self._step)
+        return delta
 
-    def _is_out_of_range(self, x: float, y: float):
-        max_x = self._height - 2 * self._circle_radius
-        max_y = self._width - 2 * self._circle_radius
-        return (x < 0) or (y < 0) or (x > max_x) or (y > max_y)
+#    def _is_out_of_range(self, position: QPointF) -> bool:
+ #       max_x = self._height - 2 * self._circle_radius
+  #      max_y = self._width - 2 * self._circle_radius
+   #     x = position.x()
+    #    y = position.y()
+     #   return (x < 0) or (y < 0) or (x > max_x) or (y > max_y)
 
     def keyPressEvent(self, event):
-        new_x, new_y = self._compute_next_x_y(event=event)
-        if not self._is_out_of_range(x=new_x, y=new_y):
-            self._x = new_x
-            self._y = new_y
-            self.update()
-
-    def _get_circle_center(self):
-        return self._x + self._circle_radius, self._y + self._circle_radius
-
-    def _get_circle_color(self):
-        if self._mouse_position_x is None:
-            return self._circle_color
-
-        circle_center_x, circle_center_y = self._get_circle_center()
-        square_distance_x = circle_center_x - self._mouse_position_x
-        square_distance_y = circle_center_y - self._mouse_position_y
-        square_distance = square_distance_x ** 2 + square_distance_y ** 2
-        if square_distance < self._circle_radius ** 2:
-            return self._hover_circle_color
-        else:
-            return self._circle_color
+        self._center_target = None
+        shift = self.calculate_shift1(event)
+        for ball in self._balls:
+            ball.move(shift)
+        self.update()
 
     def mouseMoveEvent(self, event):
-        color_before = self._get_circle_color()
-        self._mouse_position_x = event.pos().x()
-        self._mouse_position_y = event.pos().y()
-        color_after = self._get_circle_color()
-        if color_before != color_after:
-            self.update()
+        self._mouse_position = QPointF(event.pos())
+        self.update()
 
     def mousePressEvent(self, event):
-        self._last_mouse_click_x = event.pos().x() - self._circle_radius
-        self._last_mouse_click_y = event.pos().y() - self._circle_radius
+        self._center_target = QPointF(event.pos())
         self.update()
 
     def _one_timer_tick(self):
-        if self._last_mouse_click_x is None:
-            return
-        vector_pos_x = self._last_mouse_click_x - self._x
-        vector_pos_y = self._last_mouse_click_y - self._y
-        vector_moving = QVector2D(vector_pos_x, vector_pos_y)
-        norm_vector_moving = vector_moving.normalized()
-        if norm_vector_moving is None:
-            return
-        one_move_circle = norm_vector_moving[0] * self._speed, norm_vector_moving[1] * self._speed
-        one_move_circle_x = one_move_circle[0]
-        one_move_circle_y = one_move_circle[1]
-        self._x += one_move_circle_x
-        self._y += one_move_circle_y
-        new_vector = QVector2D(vector_pos_x, vector_pos_y)
-        if new_vector.length() < self._speed:
-            self._x += new_vector[0]
-            self._y += new_vector[1]
-        self.update()
-        # vector_moving_len = sqrt(vector_pos_x ** 2 + vector_pos_y ** 2)
-        # one_move_circle = norm_vector_moving[0] * self._speed, norm_vector_moving[1] * self._speed
+        if self._center_target is not None:
+            for ball in self._balls:
+                shift = ball.calculate_shift2(self._center_target)
+                ball.move(shift)
+            self.update()
+
+
+class Ball:
+    def __init__(
+            self,
+            x: int,
+            y: int,
+            default_color: str,
+            hover_color: str,
+            circle_radius: int,
+            speed: float,
+    ):
+        self._center_position = QPointF(x, y)
+        self._default_color = default_color
+        self._hover_color = hover_color
+        self._circle_radius = circle_radius
+        self._speed = speed
+
+    def draw(self, painter: QPainter, mouse_position: QPointF):
+        pen = QPen()
+        pen.setWidth(2)
+        painter.setPen(pen)
+        painter.setBrush(QBrush(QColor(self._get_circle_color(mouse_position)), Qt.BrushStyle.SolidPattern))
+        painter.drawEllipse(
+            self._center_position,
+            round(self._circle_radius),
+            round(self._circle_radius),
+        )
+
+    def _get_circle_color(self, mouse_position: QPointF) -> str:
+        if mouse_position is None:
+            return self._default_color
+
+        from_circle_to_mouse = QVector2D(self._center_position - mouse_position)
+        if from_circle_to_mouse.length() < self._circle_radius:
+            return self._hover_color
+        else:
+            return self._default_color
+
+    def move(self, shift: QPointF):
+        self._center_position += shift
+
+    def calculate_shift2(self, center_target: QPointF) -> QPointF:
+        assert isinstance(center_target, QPointF), type(center_target)
+        from_ball_to_target = QVector2D(center_target - self._center_position)
+        if from_ball_to_target.length() < self._speed:
+            return center_target - self._center_position
+        else:
+            move_direction = from_ball_to_target.normalized()
+            return move_direction.toPointF() * self._speed
 
 
 WINDOW_WIDTH = 500
@@ -130,14 +128,17 @@ WINDOW_HEIGHT = 500
 
 def main():
     app = QApplication(sys.argv)
-    widget = CircleWidget(
+    widget = BallWidget(
         width=WINDOW_WIDTH,
         height=WINDOW_HEIGHT,
-        circle_radius=50,
-        circle_color="red",
-        hover_circle_color="green",
         step=10,
-        speed=2,
+        frame_per_second=60,
+        balls=[
+            Ball(x=100, y=250, default_color="red", hover_color="darkred", circle_radius=70, speed=1),
+            Ball(x=225, y=250, default_color="blue", hover_color="darkblue", circle_radius=50, speed=2),
+            Ball(x=325, y=250, default_color="green", hover_color="darkgreen", circle_radius=40, speed=3),
+            Ball(x=400, y=250, default_color="orange", hover_color="darkorange", circle_radius=20, speed=4),
+        ]
     )
     widget.setWindowTitle("BallGame")
     widget.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
