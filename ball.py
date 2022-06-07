@@ -1,5 +1,5 @@
 from typing import Optional
-from PyQt6.QtCore import Qt, QPointF
+from PyQt6.QtCore import Qt, QPointF, QRect, QSize
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
 
 
@@ -10,15 +10,18 @@ class Ball:
             y: int,
             default_color: str,
             hover_color: str,
-            circle_radius: int,
+            radius: int,
             speed: float,
     ):
         self._center_position = QPointF(x, y)
         self._default_color = default_color
         self._hover_color = hover_color
-        self._circle_radius = circle_radius
+        self._radius = radius
         self._speed = speed
         self._center_target: Optional[QPointF] = None
+
+    def intersects_with_rect(self, rect: QRect) -> bool:
+        return rect.contains(self._center_position.toPoint())
 
     def set_center_target(self, center_target: QPointF):
         self._center_target = center_target
@@ -30,8 +33,8 @@ class Ball:
         painter.setBrush(QBrush(QColor(self._get_circle_color(mouse_position)), Qt.BrushStyle.SolidPattern))
         painter.drawEllipse(
             self._center_position,
-            round(self._circle_radius),
-            round(self._circle_radius),
+            round(self._radius),
+            round(self._radius),
         )
 
     def _get_circle_color(self, mouse_position: QPointF) -> str:
@@ -39,7 +42,7 @@ class Ball:
             return self._default_color
 
         from_circle_to_mouse = QVector2D(self._center_position - mouse_position)
-        if from_circle_to_mouse.length() < self._circle_radius:
+        if from_circle_to_mouse.length() < self._radius:
             return self._hover_color
         else:
             return self._default_color
@@ -59,4 +62,4 @@ class Ball:
 
     def is_clicked(self, mouse_position: QPointF) -> bool:
         vector = QVector2D(self._center_position - mouse_position)
-        return vector.length() <= self._circle_radius
+        return vector.length() <= self._radius

@@ -1,5 +1,5 @@
 from typing import Optional, List
-from PyQt6.QtCore import QRect, QPointF
+from PyQt6.QtCore import QRect, QPointF, QSize, QPoint
 
 from ball import Ball
 
@@ -21,8 +21,8 @@ class SelectingRect:
 
     def expand_rect(self, mouse_position: QPointF):
         assert self._rect is not None
-        delta_width: int = mouse_position.y() - self._rect.y() - self._rect.width()
-        delta_height: int = mouse_position.x() - self._rect.x() - self._rect.height()
+        delta_width: int = mouse_position.x() - self._rect.x() - self._rect.width()
+        delta_height: int = mouse_position.y() - self._rect.y() - self._rect.height()
         self._rect.adjust(0, 0, delta_width, delta_height)
 
     def clear_rect(self):
