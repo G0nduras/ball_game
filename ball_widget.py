@@ -47,17 +47,21 @@ class BallWidget(QWidget):
         self.update()
 
     def mouseReleaseEvent(self, event):
-        self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
-        self._selecting_rect.clear_rect()
+        if event.button() == Qt.MouseButton.RightButton:
+            self._selected_balls = self._selected_balls
+            self._selecting_rect.clear_rect()
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
+            self._selecting_rect.clear_rect()
 
     def mousePressEvent(self, event):
         self._selecting_rect.start_rect(event.pos())
-        if event.buttons() == Qt.MouseButton.RightButton:
+        if event.buttons() == Qt.MouseButton.LeftButton:
             for ball in self._balls:
                 if ball.is_clicked(mouse_position=QPointF(event.pos())):
                     self._selected_balls = []
 
-        if event.buttons() == Qt.MouseButton.LeftButton:
+        if event.buttons() == Qt.MouseButton.RightButton:
             if self._selected_balls is not None:
                 for ball in self._selected_balls:
                     ball.set_center_target(center_target=QPointF(event.pos()))
