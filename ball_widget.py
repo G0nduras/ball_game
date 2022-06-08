@@ -46,6 +46,13 @@ class BallWidget(QWidget):
         for ball in self._selected_balls:
             ball.draw(painter=painter, mouse_position=self._mouse_position, hover_pen_width=SELECTED_PEN_WIDTH)
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Space:
+            for ball in self._selected_balls:
+                jump_shift = ball.calculate_jump()
+                ball.move(jump_shift)
+        self.update()
+
     def mouseMoveEvent(self, event):
         if not self._selecting_rect.is_none():
             self._selecting_rect.expand_rect(event.pos())
@@ -72,7 +79,7 @@ class BallWidget(QWidget):
 
     def one_timer_tick(self):
         for ball in self._balls:
-            shift = ball.calculate_shift2()
+            shift = ball.calculate_shift_on_tick()
             ball.move(shift)
         self.update()
 

@@ -17,10 +17,10 @@ def main():
         step=10,
         frame_per_second=60,
         balls=[
-            Ball(x=100, y=250, default_color="red", hover_color="darkred", radius=70, speed=1),
-            Ball(x=225, y=250, default_color="blue", hover_color="darkblue", radius=50, speed=2),
-            Ball(x=325, y=250, default_color="green", hover_color="darkgreen", radius=40, speed=3),
-            Ball(x=400, y=250, default_color="orange", hover_color="darkorange", radius=20, speed=4),
+            Ball(x=100, y=250, default_color="red", hover_color="darkred", radius=70, speed=1, jump_len=2),
+            Ball(x=225, y=250, default_color="blue", hover_color="darkblue", radius=50, speed=2, jump_len=4),
+            Ball(x=325, y=250, default_color="green", hover_color="darkgreen", radius=40, speed=3, jump_len=8),
+            Ball(x=400, y=250, default_color="orange", hover_color="darkorange", radius=20, speed=4, jump_len=16),
         ]
     )
     widget.setWindowTitle("BallGame")
