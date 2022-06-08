@@ -40,11 +40,11 @@ class BallWidget(QWidget):
             painter.setPen(pen)
             painter.setBrush(QBrush(QColor(0, 200, 0, 50), Qt.BrushStyle.SolidPattern))
             painter.drawRect(self._selecting_rect.get_rect())
-        for ball in self._selected_balls:
-            ball.draw(painter=painter, mouse_position=self._mouse_position, hover_pen_width=SELECTED_PEN_WIDTH)
         for ball in self._balls:
             if ball not in self._selected_balls:
                 ball.draw(painter=painter, mouse_position=self._mouse_position, hover_pen_width=DEFAULT_PEN_WIDTH)
+        for ball in self._selected_balls:
+            ball.draw(painter=painter, mouse_position=self._mouse_position, hover_pen_width=SELECTED_PEN_WIDTH)
 
     def mouseMoveEvent(self, event):
         if not self._selecting_rect.is_none():
@@ -53,17 +53,16 @@ class BallWidget(QWidget):
         self.update()
 
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.RightButton:
-            pass
         if event.button() == Qt.MouseButton.LeftButton:
-            self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
+            if self._selecting_rect.is_small():
+                for ball in self._balls:
+                    if ball.is_clicked(mouse_position=QPointF(event.pos())):
+                        self._selected_balls = [ball]
+            else:
+                self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
         self._selecting_rect.clear_rect()
 
     def mousePressEvent(self, event):
-        if event.buttons() == Qt.MouseButton.MiddleButton:
-            for ball in self._balls:
-                if ball.is_clicked(mouse_position=QPointF(event.pos())):
-                    self._selected_balls = [ball]
         if event.buttons() == Qt.MouseButton.LeftButton:
             self._selecting_rect.start_rect(event.pos())
         if event.buttons() == Qt.MouseButton.RightButton:

@@ -5,6 +5,8 @@ from ball import Ball
 
 
 class SelectingRect:
+    SMALL_RECT_AREA = 2 * 2
+
     def __init__(self):
         self._rect: Optional[QRect] = None
 
@@ -34,3 +36,6 @@ class SelectingRect:
 
     def is_none(self) -> bool:
         return self._rect is None
+
+    def is_small(self) -> bool:
+        return self.is_none() or (self._rect.width() * self._rect.height() < SelectingRect.SMALL_RECT_AREA)
