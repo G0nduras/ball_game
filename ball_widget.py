@@ -1,5 +1,5 @@
 from typing import Optional, List
-from PyQt6.QtCore import Qt, QTimer, QPointF, QRect
+from PyQt6.QtCore import Qt, QTimer, QPointF
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush
 
@@ -13,16 +13,12 @@ SELECTED_PEN_WIDTH = 2
 class BallWidget(QWidget):
     def __init__(
             self,
-            width: float,
-            height: float,
             step: float,
             frame_per_second: int,
             balls: List[Ball],
             selecting_rect: SelectingRect,
     ):
         super().__init__()
-        self._width: float = width
-        self._height: float = height
         self._step: float = step
         self._mouse_position: Optional[QPointF] = None
         self.timer = QTimer()
@@ -47,6 +43,8 @@ class BallWidget(QWidget):
             ball.draw(painter=painter, mouse_position=self._mouse_position, hover_pen_width=SELECTED_PEN_WIDTH)
 
     def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Escape:
+            self.close()
         if event.key() == Qt.Key.Key_Space:
             for ball in self._selected_balls:
                 jump_shift = ball.calculate_jump()
@@ -82,4 +80,3 @@ class BallWidget(QWidget):
             shift = ball.calculate_shift_on_tick()
             ball.move(shift)
         self.update()
-

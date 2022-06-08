@@ -2,9 +2,6 @@ from typing import Optional
 from PyQt6.QtCore import Qt, QPointF, QRect
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
 
-DEFAULT_PEN_WIDTH = 2
-SELECTED_PEN_WIDTH = 5
-
 
 class Ball:
     def __init__(
@@ -61,13 +58,7 @@ class Ball:
         if from_ball_to_target.length() < self._speed:
             self._center_target = None
 
-    def calculate_jump(self) -> Optional[QPointF]:
-        jump_direction = self.calculate_moving_direction()
-        if jump_direction is None:
-            return None
-        return jump_direction.toPointF() * self._jump_len
-
-    def calculate_moving_direction(self) -> Optional[QPointF]:
+    def calculate_moving_direction(self) -> Optional[QVector2D]:
         if self._center_target is None:
             return None
         from_ball_to_target = QVector2D(self._center_target - self._center_position)
@@ -75,8 +66,14 @@ class Ball:
             return None
         return from_ball_to_target.normalized()
 
+    def calculate_jump(self) -> Optional[QPointF]:
+        jump_direction: QVector2D = self.calculate_moving_direction()
+        if jump_direction is None:
+            return None
+        return jump_direction.toPointF() * self._jump_len
+
     def calculate_shift_on_tick(self) -> Optional[QPointF]:
-        target_direction = self.calculate_moving_direction()
+        target_direction: QVector2D = self.calculate_moving_direction()
         if target_direction is None:
             return None
         return target_direction.toPointF() * self._speed
