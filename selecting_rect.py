@@ -1,5 +1,5 @@
 from typing import Optional, List
-from PyQt6.QtCore import QRect, QPointF, QSize, QPoint
+from PyQt6.QtCore import QRect, QPointF
 
 from ball import Ball
 

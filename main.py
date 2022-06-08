@@ -3,8 +3,6 @@ from PyQt6.QtWidgets import QApplication
 from selecting_rect import SelectingRect
 from ball import Ball
 from ball_widget import BallWidget
-from PyQt6.QtCore import QRect
-
 
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500

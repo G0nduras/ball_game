@@ -1,6 +1,9 @@
 from typing import Optional
-from PyQt6.QtCore import Qt, QPointF, QRect, QSize
+from PyQt6.QtCore import Qt, QPointF, QRect
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
+
+DEFAULT_PEN_WIDTH = 2
+SELECTED_PEN_WIDTH = 5
 
 
 class Ball:
@@ -26,9 +29,9 @@ class Ball:
     def set_center_target(self, center_target: QPointF):
         self._center_target = center_target
 
-    def draw(self, painter: QPainter, mouse_position: QPointF):
+    def draw(self, painter: QPainter, mouse_position: QPointF, hover_pen_width):
         pen = QPen()
-        pen.setWidth(2)
+        pen.setWidth(hover_pen_width)
         painter.setPen(pen)
         painter.setBrush(QBrush(QColor(self._get_circle_color(mouse_position)), Qt.BrushStyle.SolidPattern))
         painter.drawEllipse(
