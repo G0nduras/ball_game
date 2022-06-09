@@ -1,13 +1,17 @@
 from typing import Optional, List
 from PyQt6.QtCore import QRect, QPointF
+from PyQt6.QtWidgets import QGraphicsRectItem
 
 from ball import Ball
 
 
-class SelectingRect:
+class SelectingRect(QGraphicsRectItem):
     SMALL_RECT_AREA = 2 * 2
 
-    def __init__(self):
+    def __init__(
+            self,
+    ):
+        super().__init__()
         self._rect: Optional[QRect] = None
 
     def filter_selected_balls(self, balls: List[Ball]) -> List[Ball]:

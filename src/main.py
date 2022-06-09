@@ -9,7 +9,6 @@ def main():
     app = QApplication(sys.argv)
     widget = BallWidget(
         selecting_rect=SelectingRect(),
-        step=10,
         frame_per_second=60,
         balls=[
             Ball(x=100, y=250, default_color="red", hover_color="darkred", radius=70, speed=1, jump_len=20),
