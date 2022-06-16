@@ -28,15 +28,19 @@ class BallScene(QGraphicsScene):
         self._widget = widget
 
         for ball in balls:
-            self.addItem(ball)
+            ball.add_ball_to_scene(self)
+
+        selecting_rect.add_rect_to_scene(self)
 
     def key_press_event(self, event):
         if event.key() == Qt.Key.Key_Escape:
             self._widget.close()
         if event.key() == Qt.Key.Key_Space:
             for ball in self._selected_balls:
-                jump_shift = ball.calculate_jump()
-                ball.setPos(jump_shift)
+                jump = ball.calculate_jump()
+                if jump is not None:
+                    jump_shift = ball.pos() + ball.calculate_jump()
+                    ball.setPos(jump_shift)
         self.update()
 
     def mouse_move_event(self, event):
@@ -53,6 +57,9 @@ class BallScene(QGraphicsScene):
                         self._selected_balls = [ball]
             else:
                 self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
+        for ball in self._balls:
+            ball.draw_selected(ball=ball, selected_balls=self._selected_balls)
+        self.update()
         self._selecting_rect.clear_rect()
 
     def mouse_press_event(self, event):

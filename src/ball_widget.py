@@ -1,5 +1,5 @@
 from typing import List
-from PyQt6.QtWidgets import QWidget, QGraphicsView
+from PyQt6.QtWidgets import QGraphicsView
 from ball import Ball
 from ball_scene import BallScene
 from selecting_rect import SelectingRect

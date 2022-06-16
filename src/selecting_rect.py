@@ -1,6 +1,7 @@
 from typing import Optional, List
-from PyQt6.QtCore import QRect, QPointF
-from PyQt6.QtWidgets import QGraphicsRectItem
+from PyQt6.QtCore import QRect, QPointF, QSizeF, QRectF, QPoint, Qt
+from PyQt6.QtGui import QPen, QBrush, QColor
+from PyQt6.QtWidgets import QGraphicsRectItem, QGraphicsScene
 
 from ball import Ball
 
@@ -12,34 +13,37 @@ class SelectingRect(QGraphicsRectItem):
             self,
     ):
         super().__init__()
-        self._rect: Optional[QRect] = None
+        self.hide()
+
+    def add_rect_to_scene(self, scene):
+        self.setPen(QPen())
+        self.setBrush(QBrush(QColor(0, 200, 0, 50), Qt.BrushStyle.SolidPattern))
+        scene.addItem(self)
 
     def filter_selected_balls(self, balls: List[Ball]) -> List[Ball]:
         selected_balls = []
         for ball in balls:
-            if ball.intersects_with_rect(rect=self._rect):
+            if ball.intersects_with_rect(rect=self.rect()):
                 selected_balls.append(ball)
         return selected_balls
 
-    def start_rect(self, mouse_click_pos: QPointF):
-        assert self._rect is None
-        self._rect = QRect(mouse_click_pos.x(), mouse_click_pos.y(), 0, 0)
+    def start_rect(self, mouse_click_pos: QPoint):
+        self.setRect(QRectF(QPointF(mouse_click_pos), QSizeF(0, 0)))
+        self.show()
 
-    def expand_rect(self, mouse_position: QPointF):
-        assert self._rect is not None
-        delta_width: int = mouse_position.x() - self._rect.x() - self._rect.width()
-        delta_height: int = mouse_position.y() - self._rect.y() - self._rect.height()
-        self._rect.adjust(0, 0, delta_width, delta_height)
+    def expand_rect(self, mouse_position: QPoint):
+        assert not self.is_none()
+        rect = self.rect()
+        delta_width: int = mouse_position.x() - rect.x() - rect.width()
+        delta_height: int = mouse_position.y() - rect.y() - rect.height()
+        self.setRect(QRectF(rect.topLeft(), QSizeF(rect.width() + delta_width, rect.height() + delta_height)))
 
     def clear_rect(self):
-        self._rect = None
-
-    def get_rect(self) -> QRect:
-        assert self._rect is not None
-        return self._rect
+        self.hide()
 
     def is_none(self) -> bool:
-        return self._rect is None
+        return not self.isVisible()
 
     def is_small(self) -> bool:
-        return self.is_none() or (self._rect.width() * self._rect.height() < SelectingRect.SMALL_RECT_AREA)
+        rect = self.rect()
+        return self.is_none() or (rect.width() * rect.height() < SelectingRect.SMALL_RECT_AREA)
