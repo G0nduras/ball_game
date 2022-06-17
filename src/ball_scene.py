@@ -55,6 +55,9 @@ class BallScene(QGraphicsScene):
                 for ball in self._balls:
                     if ball.is_clicked(mouse_position=QPointF(event.pos())):
                         self._selected_balls = [ball]
+                        break
+                else:
+                    self._selected_balls = []
             else:
                 self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
         for ball in self._balls:

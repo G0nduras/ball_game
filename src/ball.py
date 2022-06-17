@@ -18,7 +18,7 @@ class Ball(QGraphicsEllipseItem):
             speed: float,
             jump_len: float,
     ):
-        super().__init__(0 - radius / 2, 0 - radius / 2, radius, radius)
+        super().__init__(-radius, - radius, radius * 2, radius * 2)
         self.setPos(QPointF(x, y))
         self._default_color = default_color
         self._hover_color = hover_color
@@ -39,12 +39,10 @@ class Ball(QGraphicsEllipseItem):
             pen = QPen()
             pen.setWidth(DEFAULT_PEN_WIDTH)
             self.setPen(pen)
-            self.setBrush(QBrush(QColor(self._default_color), Qt.BrushStyle.SolidPattern))
         if ball in selected_balls:
             pen = QPen()
             pen.setWidth(SELECTED_PEN_WIDTH)
             self.setPen(pen)
-            self.setBrush(QBrush(QColor(self._hover_color), Qt.BrushStyle.SolidPattern))
 
     def intersects_with_rect(self, rect: QRectF) -> bool:
         return rect.contains(self.scenePos())
