@@ -1,13 +1,12 @@
 from typing import List, Optional
 
 from PyQt6.QtCore import QPointF, QTimer, Qt
+from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsScene
 from selecting_rect import SelectingRect
 from ball import Ball
 
-DEFAULT_PEN_WIDTH = 0
-SELECTED_PEN_WIDTH = 2
-
+MIN_TARGET_DISTANCE = 2
 
 class BallScene(QGraphicsScene):
     def __init__(
@@ -61,7 +60,7 @@ class BallScene(QGraphicsScene):
             else:
                 self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
         for ball in self._balls:
-            ball.draw_selected(ball=ball, selected_balls=self._selected_balls)
+            ball.set_draw_method(is_selected=ball in self._selected_balls)
         self.update()
         self._selecting_rect.clear_rect()
 
@@ -75,7 +74,15 @@ class BallScene(QGraphicsScene):
 
     def one_timer_tick(self):
         for ball in self._balls:
-            shift = ball.calculate_shift_on_tick()
-            if shift is not None:
-                new_pos = ball.pos() + shift
-                ball.setPos(new_pos)
+            force = ball.get_force()
+            assert isinstance(force, QVector2D), type(force)
+            acceleration = force / ball._mass
+            # F = m*a
+            ball._velocity += acceleration
+            # V = a => DELTA_V = a * DELTA_t
+            new_pos = ball.pos() + ball._velocity.toPointF()
+            if ball._center_target is not None:
+                shift = QVector2D(new_pos - ball._center_target)
+                if shift.length() < MIN_TARGET_DISTANCE:
+                    ball._center_target = None
+            ball.setPos(new_pos)

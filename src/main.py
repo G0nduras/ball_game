@@ -13,10 +13,10 @@ def main():
         selecting_rect=SelectingRect(),
         frame_per_second=60,
         balls=[
-            Ball(x=200, y=350, default_color="red", hover_color="darkred", radius=100, speed=1, jump_len=20),
-            Ball(x=400, y=350, default_color="blue", hover_color="darkblue", radius=75, speed=2, jump_len=40),
-            Ball(x=550, y=350, default_color="green", hover_color="darkgreen", radius=50, speed=3, jump_len=80),
-            Ball(x=650, y=350, default_color="orange", hover_color="darkorange", radius=25, speed=4, jump_len=160),
+            Ball(x=200, y=350, default_color="red", hover_color="darkred", radius=100, power=100, jump_len=20, mass=1000, alpha=200),
+            Ball(x=400, y=350, default_color="blue", hover_color="darkblue", radius=75, power=200, jump_len=40, mass=750, alpha=200),
+            Ball(x=550, y=350, default_color="green", hover_color="darkgreen", radius=50, power=300, jump_len=80, mass=500, alpha=200),
+            Ball(x=650, y=350, default_color="orange", hover_color="darkorange", radius=25, power=400, jump_len=160, mass=250, alpha=200),
         ],
     )
     widget.setWindowTitle("BallGame")
