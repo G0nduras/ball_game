@@ -1,4 +1,5 @@
 from typing import Optional
+import math
 from PyQt6.QtCore import Qt, QPointF, QRectF
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
 from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsScene
@@ -16,9 +17,9 @@ class Ball(QGraphicsEllipseItem):
             hover_color: str,
             radius: int,
             jump_len: float,
-            mass: float,
             power: float,
-            alpha: float,
+            resistance_alpha: float,
+            density: float,
     ):
         super().__init__(-radius, - radius, radius * 2, radius * 2)
         self.setPos(QPointF(x, y))
@@ -28,9 +29,10 @@ class Ball(QGraphicsEllipseItem):
         self._velocity: QVector2D = QVector2D(0, 0)
         self._jump_len = jump_len
         self._center_target: Optional[QPointF] = None
-        self._mass = mass
+        self._mass = 4 / 3 * math.pi * radius ** 3 * density
         self._power = power
-        self._alpha = alpha
+        self._resistance_alpha = resistance_alpha
+        self._density = density
 
     def add_ball_to_scene(self, scene: QGraphicsScene):
         pen = QPen()
@@ -74,7 +76,7 @@ class Ball(QGraphicsEllipseItem):
         moving_direction = self.calculate_moving_direction()
         if moving_direction is not None:
             force += moving_direction * self._power
-        force -= self._alpha * self._velocity
+        force -= self._resistance_alpha * self._radius * self._velocity
         return force
 
     def is_clicked(self, mouse_position: QPointF) -> bool:
