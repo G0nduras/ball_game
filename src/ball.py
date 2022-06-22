@@ -81,6 +81,7 @@ class Ball(QGraphicsEllipseItem):
 
     def calculate_sum_force(self) -> QVector2D:
         force = self.calculate_thrust_force() + self.calculate_friction_force()
+        force += self._impulse
         self._impulse = QVector2D(0, 0)
         return force
 
