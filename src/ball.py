@@ -16,10 +16,10 @@ class Ball(QGraphicsEllipseItem):
             default_color: str,
             hover_color: str,
             radius: int,
-            jump_len: float,
-            power: float,
             resistance_alpha: float,
             density: float,
+            trust_force_module: float,
+            jump_impulse_module: float,
     ):
         super().__init__(-radius, - radius, radius * 2, radius * 2)
         self.setPos(QPointF(x, y))
@@ -27,12 +27,13 @@ class Ball(QGraphicsEllipseItem):
         self._hover_color = hover_color
         self._radius = radius
         self._velocity: QVector2D = QVector2D(0, 0)
-        self._jump_len = jump_len
         self._center_target: Optional[QPointF] = None
         self._mass = 4 / 3 * math.pi * radius ** 3 * density
-        self._power = power
         self._resistance_alpha = resistance_alpha
         self._density = density
+        self._trust_force_module = trust_force_module
+        self._impulse: QVector2D = QVector2D(0, 0)
+        self._impulse_score = jump_impulse_module
 
     def add_ball_to_scene(self, scene: QGraphicsScene):
         pen = QPen()
@@ -61,22 +62,26 @@ class Ball(QGraphicsEllipseItem):
         if self._center_target is None:
             return None
         from_ball_to_target = QVector2D(self._center_target - self.scenePos())
-        #if from_ball_to_target.length() < self._power:
-        #    return None
         return from_ball_to_target.normalized()
 
-    def calculate_jump(self) -> Optional[QPointF]:
-        jump_direction: QVector2D = self.calculate_moving_direction()
-        if jump_direction is None:
-            return None
-        return jump_direction.toPointF() * self._jump_len
+    def add_impulse(self, impulse: QVector2D):
+        self._impulse += impulse
 
-    def get_force(self) -> QVector2D:
-        force = QVector2D(0, 0)
+    def calculate_thrust_force(self) -> QVector2D:
         moving_direction = self.calculate_moving_direction()
         if moving_direction is not None:
-            force += moving_direction * self._power
-        force -= self._resistance_alpha * self._radius * self._velocity
+            thrust_force = self._trust_force_module * moving_direction
+            return thrust_force
+        else:
+            return QVector2D(0, 0)
+
+    def calculate_friction_force(self) -> QVector2D:
+        friction_force = - self._resistance_alpha * self._radius * self._velocity
+        return friction_force
+
+    def calculate_sum_force(self) -> QVector2D:
+        force = self.calculate_thrust_force() + self.calculate_friction_force()
+        self._impulse = QVector2D(0, 0)
         return force
 
     def is_clicked(self, mouse_position: QPointF) -> bool:

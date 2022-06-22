@@ -36,10 +36,10 @@ class BallScene(QGraphicsScene):
             self._widget.close()
         if event.key() == Qt.Key.Key_Space:
             for ball in self._selected_balls:
-                jump = ball.calculate_jump()
-                if jump is not None:
-                    jump_shift = ball.pos() + ball.calculate_jump()
-                    ball.setPos(jump_shift)
+                if ball._center_target is not None:
+                    impulse = ball.calculate_moving_direction() * ball._impulse_score
+                    print(impulse)
+                    ball.add_impulse(impulse)
         self.update()
 
     def mouse_move_event(self, event):
@@ -74,7 +74,7 @@ class BallScene(QGraphicsScene):
 
     def one_timer_tick(self):
         for ball in self._balls:
-            force = ball.get_force()
+            force = ball.calculate_sum_force()
             assert isinstance(force, QVector2D), type(force)
             acceleration = force / ball._mass
             # F = m*a
