@@ -14,8 +14,6 @@ def main():
     resistance_alpha = 50
     density = 1
     widget = BallWidget(
-        selecting_rect=SelectingRect(),
-        frame_per_second=60,
         balls=[
             Ball(
                 x=200,

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 import math
 from PyQt6.QtCore import Qt, QPointF, QRectF
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
@@ -88,3 +88,6 @@ class Ball(QGraphicsEllipseItem):
     def is_clicked(self, mouse_position: QPointF) -> bool:
         vector = QVector2D(self.scenePos() - mouse_position)
         return vector.length() <= self._radius
+
+    def get_position(self) -> Tuple[float, float]:
+        return float(self.pos().x()), float(self.pos().y())

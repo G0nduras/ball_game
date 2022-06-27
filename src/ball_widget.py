@@ -1,7 +1,7 @@
 from typing import List
 from PyQt6.QtWidgets import QGraphicsView
 from ball import Ball
-from ball_scene import BallScene
+from client_scene import ClientScene
 from selecting_rect import SelectingRect
 
 
@@ -9,15 +9,11 @@ class BallWidget(QGraphicsView):
     def __init__(
             self,
             balls: List[Ball],
-            selecting_rect: SelectingRect,
-            frame_per_second: int,
     ):
         super().__init__()
-        self._scene = BallScene(
+        self._scene = ClientScene(
             balls=balls,
-            selecting_rect=selecting_rect,
-            frame_per_second=frame_per_second,
-            widget=self,
+            exit_function=self.close,
         )
         self.setScene(self._scene)
 

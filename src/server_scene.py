@@ -1,79 +1,36 @@
-from typing import List, Optional
+from typing import List
 from math import sqrt
-from PyQt6.QtCore import QPointF, QTimer, Qt
+from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsScene
-from selecting_rect import SelectingRect
 from ball import Ball
+from balls_positions import BallsPositions
 
 MIN_TARGET_DISTANCE = 2
 
 
-class BallScene(QGraphicsScene):
+class ServerScene(QGraphicsScene):
+    MS_IN_S = 1000
+    on_timer_tick_signal = pyqtSignal(BallsPositions)
+
     def __init__(
             self,
-            frame_per_second: int,
             balls: List[Ball],
-            selecting_rect: SelectingRect,
-            widget: "BallWidget",
+            frame_per_second: int,
+            repulsive_mul: int,
     ):
         super().__init__()
-        self._mouse_position: Optional[QPointF] = None
+        self._frame_per_second = frame_per_second
+        self._repulsive_mul = repulsive_mul
         self.timer = QTimer()
-        self.timer.timeout.connect(self.one_timer_tick)
-        self.timer.start(round(1000 / frame_per_second))
+        self.timer.timeout.connect(self.on_timer_tick)
+        self.timer.start(round(ServerScene.MS_IN_S / frame_per_second))
         self._balls: List[Ball] = balls
-        self._selected_balls: List[Ball] = []
-        self._selecting_rect: SelectingRect = selecting_rect
-        self._widget = widget
-        self._repulsive_mul = 10000
 
         for ball in balls:
             ball.add_ball_to_scene(self)
 
-        selecting_rect.add_rect_to_scene(self)
-
-    def key_press_event(self, event):
-        if event.key() == Qt.Key.Key_Escape:
-            self._widget.close()
-        if event.key() == Qt.Key.Key_Space:
-            for ball in self._selected_balls:
-                if ball._center_target is not None:
-                    impulse = ball.calculate_moving_direction() * ball._impulse_score
-                    ball.add_impulse(impulse)
-        self.update()
-
-    def mouse_move_event(self, event):
-        if not self._selecting_rect.is_none():
-            self._selecting_rect.expand_rect(event.pos())
-        self._mouse_position = QPointF(event.pos())
-        self.update()
-
-    def mouse_release_event(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            if self._selecting_rect.is_small():
-                for ball in self._balls:
-                    if ball.is_clicked(mouse_position=QPointF(event.pos())):
-                        self._selected_balls = [ball]
-                        break
-                else:
-                    self._selected_balls = []
-            else:
-                self._selected_balls = self._selecting_rect.filter_selected_balls(self._balls)
-        for ball in self._balls:
-            ball.set_draw_method(is_selected=ball in self._selected_balls)
-        self.update()
-        self._selecting_rect.clear_rect()
-
-    def mouse_press_event(self, event):
-        if event.buttons() == Qt.MouseButton.LeftButton:
-            self._selecting_rect.start_rect(event.pos())
-        if event.buttons() == Qt.MouseButton.RightButton:
-            if self._selected_balls is not None:
-                for ball in self._selected_balls:
-                    ball.set_center_target(center_target=QPointF(event.pos()))
-
-    def one_timer_tick(self):
+    def _calculate_crash_impulses(self):
         for index_1 in range(0, len(self._balls)):
             for index_2 in range(index_1 + 1, len(self._balls)):
                 ball1 = self._balls[index_1]
@@ -98,6 +55,8 @@ class BallScene(QGraphicsScene):
                     d = ball_to_ball / ball_to_ball.length()
                     ball1.add_impulse((mass1 * projection_v_1 - mass1 * v_1) * d / self._repulsive_mul)
                     ball2.add_impulse((mass2 * projection_v_2 - mass2 * v_2) * d / self._repulsive_mul)
+
+    def _update_ball_positions(self):
         for ball in self._balls:
             force = ball.calculate_sum_force()
             assert isinstance(force, QVector2D), type(force)
@@ -111,7 +70,8 @@ class BallScene(QGraphicsScene):
                 if shift.length() < MIN_TARGET_DISTANCE:
                     ball._center_target = None
             ball.setPos(new_pos)
-        print('-' * 100)
-        for ball in self._balls:
-            print(ball.pos())
-        print('-' * 100)
+
+    def on_timer_tick(self):
+        self._calculate_crash_impulses()
+        self._update_ball_positions()
+        self.on_timer_tick_signal.emit(BallsPositions.from_balls(self._balls))
