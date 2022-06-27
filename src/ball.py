@@ -3,6 +3,7 @@ import math
 from PyQt6.QtCore import Qt, QPointF, QRectF
 from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
 from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsScene
+from balls_positions import BallPosition
 
 DEFAULT_PEN_WIDTH = 0
 SELECTED_PEN_WIDTH = 2
@@ -89,5 +90,10 @@ class Ball(QGraphicsEllipseItem):
         vector = QVector2D(self.scenePos() - mouse_position)
         return vector.length() <= self._radius
 
-    def get_position(self) -> Tuple[float, float]:
-        return float(self.pos().x()), float(self.pos().y())
+    def get_position(self) -> BallPosition:
+        return BallPosition(float(self.pos().x()), float(self.pos().y()))
+
+    def jump(self, ball):
+        if ball._center_target is not None:
+            impulse = self.calculate_moving_direction() * ball._impulse_score
+            ball.add_impulse(impulse)

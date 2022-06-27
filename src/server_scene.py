@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 from math import sqrt
-from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtCore import QTimer, pyqtSignal, QPointF
 from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsScene
 from ball import Ball
-from balls_positions import BallsPositions
+from balls_positions import BallsPositions, BallPosition
 
 MIN_TARGET_DISTANCE = 2
 
@@ -29,6 +29,16 @@ class ServerScene(QGraphicsScene):
 
         for ball in balls:
             ball.add_ball_to_scene(self)
+
+    @staticmethod
+    def set_jump(self, ball_index: List[int]):
+        for i in ball_index:
+            self._balls[i].jump(ball=self._balls[i])
+
+    @staticmethod
+    def set_target_for_selected_balls(self, ball_index: List[int], ball_position: BallPosition):
+        for i in ball_index:
+            self._balls[i].set_center_target(center_target=ball_position.to_q_point_f())
 
     def _calculate_crash_impulses(self):
         for index_1 in range(0, len(self._balls)):
