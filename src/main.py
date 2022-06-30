@@ -1,7 +1,8 @@
 import sys
 from PyQt6.QtCore import Qt, QPointF, QRectF, QSizeF
 from PyQt6.QtWidgets import QApplication, QAbstractScrollArea
-from ball import Ball
+from server_ball import ServerBall
+from client_ball import ClientBall
 from ball_widget import BallWidget
 from server_scene import ServerScene
 from client_scene import ClientScene
@@ -14,94 +15,70 @@ def main():
     resistance_alpha = 50
     density = 1
     client_balls = [
-            Ball(
+            ClientBall(
                 x=200,
                 y=350,
                 default_color="red",
                 hover_color="darkred",
                 radius=100,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
             ),
-            Ball(
+            ClientBall(
                 x=400,
                 y=350,
                 default_color="blue",
                 hover_color="darkblue",
                 radius=75,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
             ),
-            Ball(
+            ClientBall(
                 x=550,
                 y=350,
                 default_color="green",
                 hover_color="darkgreen",
                 radius=50,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
             ),
-            Ball(
+            ClientBall(
                 x=650,
                 y=350,
                 default_color="orange",
                 hover_color="darkorange",
                 radius=25,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
             ),
         ]
     server_balls = [
-            Ball(
+            ServerBall(
                 x=200,
                 y=350,
-                default_color="red",
-                hover_color="darkred",
                 radius=100,
                 density=density,
                 resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
+                thrust_force_module=trust_force_module,
                 jump_impulse_module=impulse_module,
             ),
-            Ball(
+            ServerBall(
                 x=400,
                 y=350,
-                default_color="blue",
-                hover_color="darkblue",
                 radius=75,
                 density=density,
                 resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
+                thrust_force_module=trust_force_module,
                 jump_impulse_module=impulse_module,
             ),
-            Ball(
+            ServerBall(
                 x=550,
                 y=350,
-                default_color="green",
-                hover_color="darkgreen",
                 radius=50,
                 density=density,
                 resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
+                thrust_force_module=trust_force_module,
                 jump_impulse_module=impulse_module,
             ),
-            Ball(
+            ServerBall(
                 x=650,
                 y=350,
-                default_color="orange",
-                hover_color="darkorange",
                 radius=25,
                 density=density,
                 resistance_alpha=resistance_alpha,
-                trust_force_module=trust_force_module,
+                thrust_force_module=trust_force_module,
                 jump_impulse_module=impulse_module,
             ),
         ]

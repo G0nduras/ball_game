@@ -16,14 +16,14 @@ class BallsPositions:
         self.balls_positions: List[BallPosition] = balls_positions
 
     @staticmethod
-    def from_balls(balls: List['Ball']):
+    def from_balls(balls: List['ServerBall']):
         #return BallsPositions(balls_positions=list(map(Ball.get_position, balls)))
         return BallsPositions(balls_positions=[
             ball.get_position()
             for ball in balls
         ])
 
-    def set_to_balls(self, balls: List['Ball']):
+    def set_to_balls(self, balls: List['ClientBall']):
         assert len(balls) == len(self.balls_positions), (len(balls), len(self.balls_positions))
         for ball, ball_position in zip(balls, self.balls_positions):
             ball.setPos(QPointF(ball_position.x, ball_position.y))

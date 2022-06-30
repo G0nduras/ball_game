@@ -1,7 +1,7 @@
 from typing import List
 from PyQt6.QtCore import QPointF, Qt, pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QGraphicsScene
-from ball import Ball
+from client_ball import ClientBall
 from selecting_rect import SelectingRect
 from balls_positions import BallsPositions, BallPosition
 
@@ -12,11 +12,11 @@ class ClientScene(QGraphicsScene):
 
     def __init__(
             self,
-            balls: List[Ball],
+            balls: List[ClientBall],
     ):
         super().__init__()
-        self._balls: List[Ball] = balls
-        self._selected_balls: List[Ball] = []
+        self._balls: List[ClientBall] = balls
+        self._selected_balls: List[ClientBall] = []
         self._selecting_rect: SelectingRect = SelectingRect()
 
         for ball in balls:

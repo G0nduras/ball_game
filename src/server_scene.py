@@ -3,7 +3,7 @@ from math import sqrt
 from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsScene
-from ball import Ball
+from server_ball import ServerBall
 from balls_positions import BallsPositions, BallPosition
 
 MIN_TARGET_DISTANCE = 2
@@ -15,7 +15,7 @@ class ServerScene(QGraphicsScene):
 
     def __init__(
             self,
-            balls: List[Ball],
+            balls: List[ServerBall],
             frame_per_second: int,
             repulsive_mul: int,
     ):
@@ -25,7 +25,7 @@ class ServerScene(QGraphicsScene):
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer_tick)
         self.timer.start(round(ServerScene.MS_IN_S / frame_per_second))
-        self._balls: List[Ball] = balls
+        self._balls: List[ServerBall] = balls
 
         for ball in balls:
             ball.add_ball_to_scene(self)

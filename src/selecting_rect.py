@@ -2,8 +2,7 @@ from typing import List
 from PyQt6.QtCore import QPointF, QSizeF, QRectF, QPoint, Qt
 from PyQt6.QtGui import QPen, QBrush, QColor
 from PyQt6.QtWidgets import QGraphicsRectItem
-
-from ball import Ball
+from client_ball import ClientBall
 
 
 class SelectingRect(QGraphicsRectItem):
@@ -20,7 +19,7 @@ class SelectingRect(QGraphicsRectItem):
         self.setBrush(QBrush(QColor(0, 200, 0, 50), Qt.BrushStyle.SolidPattern))
         scene.addItem(self)
 
-    def filter_selected_balls(self, balls: List[Ball]) -> List[Ball]:
+    def filter_selected_balls(self, balls: List[ClientBall]) -> List[ClientBall]:
         selected_balls = []
         for ball in balls:
             if ball.intersects_with_rect(rect=self.rect()):
