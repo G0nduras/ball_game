@@ -1,7 +1,7 @@
-from typing import Optional, Tuple
+from typing import Optional
 import math
 from PyQt6.QtCore import Qt, QPointF, QRectF
-from PyQt6.QtGui import QPainter, QColor, QPen, QBrush, QVector2D
+from PyQt6.QtGui import QColor, QPen, QBrush, QVector2D
 from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsScene
 from balls_positions import BallPosition
 

@@ -1,7 +1,7 @@
-from typing import Optional, List
-from PyQt6.QtCore import QRect, QPointF, QSizeF, QRectF, QPoint, Qt
+from typing import List
+from PyQt6.QtCore import QPointF, QSizeF, QRectF, QPoint, Qt
 from PyQt6.QtGui import QPen, QBrush, QColor
-from PyQt6.QtWidgets import QGraphicsRectItem, QGraphicsScene
+from PyQt6.QtWidgets import QGraphicsRectItem
 
 from ball import Ball
 

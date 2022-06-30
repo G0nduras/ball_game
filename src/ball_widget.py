@@ -1,23 +1,20 @@
-from typing import List
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QGraphicsView
-from ball import Ball
 from client_scene import ClientScene
-from selecting_rect import SelectingRect
 
 
 class BallWidget(QGraphicsView):
     def __init__(
             self,
-            balls: List[Ball],
+            client_scene: ClientScene
     ):
         super().__init__()
-        self._scene = ClientScene(
-            balls=balls,
-            exit_function=self.close,
-        )
+        self._scene = client_scene
         self.setScene(self._scene)
 
     def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Escape:
+            self.close()
         self._scene.key_press_event(event)
 
     def mouseMoveEvent(self, event):
