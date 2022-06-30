@@ -52,7 +52,7 @@ def main():
                 density=density,
                 resistance_alpha=resistance_alpha,
                 thrust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
+                jump_impulse_module=impulse_module/2,
             ),
             ServerBall(
                 x=400,
@@ -61,7 +61,7 @@ def main():
                 density=density,
                 resistance_alpha=resistance_alpha,
                 thrust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
+                jump_impulse_module=impulse_module / 4,
             ),
             ServerBall(
                 x=550,
@@ -70,7 +70,7 @@ def main():
                 density=density,
                 resistance_alpha=resistance_alpha,
                 thrust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
+                jump_impulse_module=impulse_module / 10,
             ),
             ServerBall(
                 x=650,
@@ -78,11 +78,11 @@ def main():
                 radius=25,
                 density=density,
                 resistance_alpha=resistance_alpha,
-                thrust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module,
+                thrust_force_module=trust_force_module / 5,
+                jump_impulse_module=impulse_module / 100,
             ),
         ]
-    server_scene = ServerScene(server_balls, frame_per_second=60, repulsive_mul=10000)
+    server_scene = ServerScene(server_balls, frame_per_second=60)
     client_scene = ClientScene(client_balls)
     server_scene.on_timer_tick_signal.connect(client_scene.get_balls_position)
     client_scene.jump_signal.connect(server_scene.set_jump)

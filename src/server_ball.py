@@ -22,10 +22,12 @@ class ServerBall(QGraphicsEllipseItem):
     ):
         super().__init__(-radius, - radius, radius * 2, radius * 2)
         self.setPos(QPointF(x, y))
+
+        self.mass = 4 / 3 * math.pi * radius ** 3 * density
+
         self._radius = radius
         self._velocity: QVector2D = QVector2D(0, 0)
         self._center_target: Optional[QPointF] = None
-        self._mass = 4 / 3 * math.pi * radius ** 3 * density
         self._resistance_alpha = resistance_alpha
         self._density = density
         self._thrust_force_module = thrust_force_module
@@ -35,6 +37,23 @@ class ServerBall(QGraphicsEllipseItem):
     def add_ball_to_scene(self, scene: QGraphicsScene):
         scene.addItem(self)
 
+    def move_with_force(self, force: QVector2D):
+        acceleration = force / self.mass
+        self._velocity += acceleration
+        new_pos = self.pos() + self._velocity.toPointF()
+        self.setPos(new_pos)
+
+    def distance_to_target(self) -> Optional[float]:
+        if self._center_target is None:
+            return None
+        return QVector2D(self._center_target - self.pos()).length()
+
+    def clear_target(self):
+        self._center_target = None
+
+    def impulse(self) -> QVector2D:
+        return self.mass * self._velocity
+
     def set_center_target(self, center_target: QPointF):
         self._center_target = center_target
 
@@ -43,6 +62,9 @@ class ServerBall(QGraphicsEllipseItem):
             return None
         from_ball_to_target = QVector2D(self._center_target - self.scenePos())
         return from_ball_to_target.normalized()
+
+    def collides_with(self, other_ball: "ServerBall") -> bool:
+        return QVector2D((self.pos() - other_ball.pos())).length() < self._radius + other_ball._radius
 
     def add_impulse(self, impulse: QVector2D):
         self._impulse += impulse
@@ -60,15 +82,14 @@ class ServerBall(QGraphicsEllipseItem):
         return friction_force
 
     def calculate_sum_force(self) -> QVector2D:
-        force = self.calculate_thrust_force() + self.calculate_friction_force()
-        force += self._impulse
+        force = self.calculate_thrust_force() + self.calculate_friction_force() + self._impulse
         self._impulse = QVector2D(0, 0)
         return force
 
     def get_position(self) -> BallPosition:
         return BallPosition(float(self.pos().x()), float(self.pos().y()))
 
-    def jump(self, ball):
-        if ball._center_target is not None:
-            impulse = self.calculate_moving_direction() * ball._jump_impulse_module
-            ball.add_impulse(impulse)
+    def jump(self):
+        if self._center_target is not None:
+            impulse = self.calculate_moving_direction() * self._jump_impulse_module
+            self.add_impulse(impulse)

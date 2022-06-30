@@ -17,11 +17,9 @@ class ServerScene(QGraphicsScene):
             self,
             balls: List[ServerBall],
             frame_per_second: int,
-            repulsive_mul: int,
     ):
         super().__init__()
         self._frame_per_second = frame_per_second
-        self._repulsive_mul = repulsive_mul
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer_tick)
         self.timer.start(round(ServerScene.MS_IN_S / frame_per_second))
@@ -33,7 +31,7 @@ class ServerScene(QGraphicsScene):
     @pyqtSlot(list)
     def set_jump(self, ball_indices: List[int]):
         for i in ball_indices:
-            self._balls[i].jump(ball=self._balls[i])
+            self._balls[i].jump()
 
     @pyqtSlot(list, BallPosition)
     def set_target_for_selected_balls(self, ball_indices: List[int], target: BallPosition):
@@ -43,43 +41,37 @@ class ServerScene(QGraphicsScene):
     def _calculate_crash_impulses(self):
         for index_1 in range(0, len(self._balls)):
             for index_2 in range(index_1 + 1, len(self._balls)):
-                ball1 = self._balls[index_1]
-                ball2 = self._balls[index_2]
-                if QVector2D((ball1.pos() - ball2.pos())).length() < ball1._radius + ball2._radius:
-                    mass1 = ball1._mass
-                    mass2 = ball2._mass
-                    velocity1 = ball1._velocity
-                    velocity2 = ball2._velocity
-                    ball_to_ball = QVector2D(ball1.pos() - ball2.pos())
-                    p_1 = mass1 * velocity1
-                    p_2 = mass2 * velocity2
-                    projection_p1 = QVector2D.dotProduct(p_1, ball_to_ball) * ball_to_ball.length()
-                    projection_p2 = QVector2D.dotProduct(p_2, ball_to_ball) * ball_to_ball.length()
-                    v_1 = projection_p1 / mass1
-                    v_2 = projection_p2 / mass2
-                    e_0 = (mass1 * (v_1 ** 2)) / 2 + (mass2 * (v_2 ** 2)) / 2
-                    p_0 = mass1 * v_1 + mass2 * v_2
-                    discriminant = sqrt(mass1 * mass2) * sqrt(2 * e_0 * (mass1 + mass2) - p_0 ** 2)
-                    projection_v_1 = (p_0 * mass1 + discriminant) / (mass1 * (mass1 + mass2))
-                    projection_v_2 = (p_0 * mass2 - discriminant) / (mass2 * (mass1 + mass2))
-                    d = ball_to_ball / ball_to_ball.length()
-                    ball1.add_impulse((mass1 * projection_v_1 - mass1 * v_1) * d / self._repulsive_mul)
-                    ball2.add_impulse((mass2 * projection_v_2 - mass2 * v_2) * d / self._repulsive_mul)
+                ball_1 = self._balls[index_1]
+                ball_2 = self._balls[index_2]
+                if ball_1.collides_with(ball_2):
+                    ball_to_ball = QVector2D(ball_1.pos() - ball_2.pos())
+                    colliding_direction = ball_to_ball / ball_to_ball.length()
+                    init_impulse_1 = ball_1.impulse()
+                    init_impulse_2 = ball_2.impulse()
+                    impulse_projection_1 = QVector2D.dotProduct(init_impulse_1, colliding_direction)
+                    impulse_projection_2 = QVector2D.dotProduct(init_impulse_2, colliding_direction)
+                    m1 = ball_1.mass
+                    m2 = ball_2.mass
+                    v_1 = impulse_projection_1 / m1
+                    v_2 = impulse_projection_2 / m2
+                    e_0 = (m1 * (v_1 ** 2)) / 2 + (m2 * (v_2 ** 2)) / 2
+                    p_0 = m1 * v_1 + m2 * v_2
+                    discriminant = sqrt(m1 * m2) * sqrt(2 * e_0 * (m1 + m2) - p_0 ** 2)
+                    final_velocity_projection_1 = (p_0 * m1 + discriminant) / (m1 * (m1 + m2))
+                    final_velocity_projection_2 = (p_0 * m2 - discriminant) / (m2 * (m1 + m2))
+                    delta_impulse_1 = (m1 * final_velocity_projection_1 - impulse_projection_1) * colliding_direction
+                    delta_impulse_2 = (m2 * final_velocity_projection_2 - impulse_projection_2) * colliding_direction
+                    ball_1.add_impulse(delta_impulse_1)
+                    ball_2.add_impulse(delta_impulse_2)
 
     def _update_ball_positions(self):
         for ball in self._balls:
             force = ball.calculate_sum_force()
             assert isinstance(force, QVector2D), type(force)
-            acceleration = force / ball._mass
-            # F = m*a
-            ball._velocity += acceleration
-            # V = a => DELTA_V = a * DELTA_t
-            new_pos = ball.pos() + ball._velocity.toPointF()
-            if ball._center_target is not None:
-                shift = QVector2D(new_pos - ball._center_target)
-                if shift.length() < MIN_TARGET_DISTANCE:
-                    ball._center_target = None
-            ball.setPos(new_pos)
+            distance_to_target = ball.distance_to_target()
+            ball.move_with_force(force)
+            if (distance_to_target is not None) and (distance_to_target < MIN_TARGET_DISTANCE):
+                ball.clear_target()
 
     def on_timer_tick(self):
         self._calculate_crash_impulses()
