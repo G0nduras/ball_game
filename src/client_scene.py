@@ -4,11 +4,12 @@ from PyQt6.QtWidgets import QGraphicsScene
 from client_ball import ClientBall
 from selecting_rect import SelectingRect
 from balls_positions import BallsPositions, BallPosition
+from targets_for_selected_balls import TargetsForSelectedBalls
 
 
 class ClientScene(QGraphicsScene):
     jump_signal = pyqtSignal(list)
-    set_target_signal = pyqtSignal(list, BallPosition)
+    set_target_signal = pyqtSignal(TargetsForSelectedBalls)
 
     def __init__(
             self,
@@ -62,7 +63,11 @@ class ClientScene(QGraphicsScene):
                     for ball_index, ball in enumerate(self._balls)
                     if ball in self._selected_balls
                 ]
-                self.set_target_signal.emit(ball_indices, BallPosition(event.pos().x(), event.pos().y()))
+                targets = TargetsForSelectedBalls(
+                    indices=ball_indices,
+                    position=BallPosition(event.pos().x(), event.pos().y())
+                )
+                self.set_target_signal.emit(targets)
 
     @pyqtSlot(BallsPositions)
     def get_balls_position(self, positions: BallsPositions):

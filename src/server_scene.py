@@ -5,13 +5,14 @@ from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsScene
 from server_ball import ServerBall
 from balls_positions import BallsPositions, BallPosition
+from targets_for_selected_balls import TargetsForSelectedBalls
 
 MIN_TARGET_DISTANCE = 2
 
 
 class ServerScene(QGraphicsScene):
     MS_IN_S = 1000
-    on_timer_tick_signal = pyqtSignal(BallsPositions)
+    set_pos_signal = pyqtSignal(BallsPositions)
 
     def __init__(
             self,
@@ -33,8 +34,10 @@ class ServerScene(QGraphicsScene):
         for i in ball_indices:
             self._balls[i].jump()
 
-    @pyqtSlot(list, BallPosition)
-    def set_target_for_selected_balls(self, ball_indices: List[int], target: BallPosition):
+    @pyqtSlot(TargetsForSelectedBalls)
+    def set_target_for_selected_balls(self, ball_indices_and_target: TargetsForSelectedBalls):
+        ball_indices = ball_indices_and_target._indices
+        target = ball_indices_and_target._position
         for i in ball_indices:
             self._balls[i].set_center_target(center_target=target.to_q_point_f())
 
@@ -76,4 +79,4 @@ class ServerScene(QGraphicsScene):
     def on_timer_tick(self):
         self._calculate_crash_impulses()
         self._update_ball_positions()
-        self.on_timer_tick_signal.emit(BallsPositions.from_balls(self._balls))
+        self.set_pos_signal.emit(BallsPositions.from_balls(self._balls))
