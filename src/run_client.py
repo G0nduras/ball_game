@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QApplication, QAbstractScrollArea
 from ball_widget import BallWidget
 from client_ball import ClientBall
 from client_scene import ClientScene
+from net_address import NetAddress
 from udp_handler import UDPHandler
 from client_player import ClientPlayer
 
@@ -26,17 +27,15 @@ def run_client():
         ClientPlayer(players_id=1, balls=[ClientBall(
             x=400 * 2,
             y=350,
-            default_color="blue",
-            hover_color="darkblue",
+            default_color="red",
+            hover_color="darkred",
             radius=75,
         )]),
     ]
     client_scene = ClientScene(client_players=players, player_id=PLAYER_ID)
     client_udp_handler = UDPHandler(
-        target_port=8888,
-        listening_port=7777,
-        target_host=QHostAddress.SpecialAddress.LocalHostIPv6,
-        listening_host=QHostAddress.SpecialAddress.LocalHostIPv6,
+        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=8888)],
+        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=7777)],
     )
     client_scene.jump_signal.connect(client_udp_handler.send_obj)
     client_scene.set_target_signal.connect(client_udp_handler.send_obj)

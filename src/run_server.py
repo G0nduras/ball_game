@@ -1,6 +1,7 @@
 import sys
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QApplication
+from net_address import NetAddress
 from server_ball import ServerBall
 from server_scene import ServerScene
 from udp_handler import UDPHandler
@@ -37,10 +38,8 @@ def run_server():
     ]
     server_scene = ServerScene(server_players=players, frame_per_second=60)
     server_udp_handler = UDPHandler(
-        target_port=7777,
-        listening_port=8888,
-        target_host=QHostAddress.SpecialAddress.LocalHostIPv6,
-        listening_host=QHostAddress.SpecialAddress.LocalHostIPv6,
+        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=7777)],
+        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=8888)],
     )
     server_udp_handler.jump_signal.connect(server_scene.set_jump)
     server_udp_handler.set_target_signal.connect(server_scene.set_target_for_selected_balls)
