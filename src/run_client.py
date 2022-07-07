@@ -1,4 +1,5 @@
 import sys
+from omegaconf import OmegaConf
 from PyQt6.QtCore import QRectF, QPointF, QSizeF, Qt
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QApplication, QAbstractScrollArea
@@ -34,8 +35,8 @@ def run_client():
     ]
     client_scene = ClientScene(client_players=players, player_id=PLAYER_ID)
     client_udp_handler = UDPHandler(
-        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=8888)],
-        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=7777)],
+        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=8888)],
+        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=7777)],
     )
     client_scene.jump_signal.connect(client_udp_handler.send_obj)
     client_scene.set_target_signal.connect(client_udp_handler.send_obj)

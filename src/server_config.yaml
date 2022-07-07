@@ -1,0 +1,4 @@
+impulse_module: 40000000
+trust_force_module: 400000
+resistance_alpha: 700
+density: 1

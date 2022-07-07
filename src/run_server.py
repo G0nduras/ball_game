@@ -1,4 +1,5 @@
 import sys
+from omegaconf import OmegaConf
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QApplication
 from net_address import NetAddress
@@ -8,38 +9,36 @@ from udp_handler import UDPHandler
 from server_player import ServerPlayer
 
 PLAYERS_COUNT = 2
+SERVER_CONFIG_PATH = "server_config.yaml"
 
 
 def run_server():
     app = QApplication(sys.argv)
-    impulse_module = 40000000
-    trust_force_module = 400000
-    resistance_alpha = 700
-    density = 1
+    conf = OmegaConf.load(SERVER_CONFIG_PATH)
     players = [
         ServerPlayer(players_id=0, balls=[ServerBall(
             x=400,
             y=350,
             radius=75,
-            density=density,
-            resistance_alpha=resistance_alpha,
-            thrust_force_module=trust_force_module,
-            jump_impulse_module=impulse_module,
+            density=conf.density,
+            resistance_alpha=conf.resistance_alpha,
+            thrust_force_module=conf.trust_force_module,
+            jump_impulse_module=conf.impulse_module,
         )]),
         ServerPlayer(players_id=1, balls=[ServerBall(
             x=400 * 2,
             y=350,
             radius=75,
-            density=density,
-            resistance_alpha=resistance_alpha,
-            thrust_force_module=trust_force_module,
-            jump_impulse_module=impulse_module,
+            density=conf.density,
+            resistance_alpha=conf.resistance_alpha,
+            thrust_force_module=conf.trust_force_module,
+            jump_impulse_module=conf.impulse_module,
         )]),
     ]
     server_scene = ServerScene(server_players=players, frame_per_second=60)
     server_udp_handler = UDPHandler(
-        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=7777)],
-        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHostIPv6, port=8888)],
+        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=7777)],
+        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=8888)],
     )
     server_udp_handler.jump_signal.connect(server_scene.set_jump)
     server_udp_handler.set_target_signal.connect(server_scene.set_target_for_selected_balls)
