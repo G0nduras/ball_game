@@ -2,7 +2,8 @@ from typing import List
 from balls_positions import BallPosition
 
 
-class TargetsForSelectedBalls:
-    def __init__(self, indices: List[int], position: BallPosition):
-        self._indices = indices
-        self._position = position
+class TargetsForBallsMessage:
+    def __init__(self, player_id: int, indices: List[int], position: BallPosition):
+        self.player_id = player_id
+        self.indices = indices
+        self.position = position

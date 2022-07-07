@@ -4,8 +4,11 @@ from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsScene
 from server_ball import ServerBall
-from balls_positions import BallsPositions, BallPosition
-from targets_for_selected_balls import TargetsForSelectedBalls
+from balls_positions import BallsPositions
+from targets_for_selected_balls import TargetsForBallsMessage
+from server_player import ServerPlayer
+from jump_message import JumpMessage
+
 
 MIN_TARGET_DISTANCE = 2
 
@@ -16,7 +19,7 @@ class ServerScene(QGraphicsScene):
 
     def __init__(
             self,
-            balls: List[ServerBall],
+            server_players: List[ServerPlayer],
             frame_per_second: int,
     ):
         super().__init__()
@@ -24,28 +27,42 @@ class ServerScene(QGraphicsScene):
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer_tick)
         self.timer.start(round(ServerScene.MS_IN_S / frame_per_second))
-        self._balls: List[ServerBall] = balls
+        self._server_players: List[ServerPlayer] = server_players
 
-        for ball in balls:
-            ball.add_ball_to_scene(self)
+        for player in server_players:
+            for ball in player.balls:
+                ball.add_ball_to_scene(self)
 
-    @pyqtSlot(list)
-    def set_jump(self, ball_indices: List[int]):
+    @pyqtSlot(JumpMessage)
+    def set_jump(self, jump_message: JumpMessage):
+        player_id = jump_message.player_indices
+        indices = jump_message.ball_indices
+        player: ServerPlayer = self._server_players[player_id]
+        for i in indices:
+            player.balls[i].jump()
+
+    @pyqtSlot(TargetsForBallsMessage)
+    def set_target_for_selected_balls(self, ball_indices_and_target: TargetsForBallsMessage):
+        ball_indices = ball_indices_and_target.indices
+        target = ball_indices_and_target.position
+        player_id = ball_indices_and_target.player_id
+        player: ServerPlayer = self._server_players[player_id]
         for i in ball_indices:
-            self._balls[i].jump()
+            player.balls[i].set_center_target(center_target=target.to_q_point_f())
 
-    @pyqtSlot(TargetsForSelectedBalls)
-    def set_target_for_selected_balls(self, ball_indices_and_target: TargetsForSelectedBalls):
-        ball_indices = ball_indices_and_target._indices
-        target = ball_indices_and_target._position
-        for i in ball_indices:
-            self._balls[i].set_center_target(center_target=target.to_q_point_f())
+    def _list_all_balls(self) -> List[ServerBall]:
+        return [
+            ball
+            for player in self._server_players
+            for ball in player.balls
+        ]
 
     def _calculate_crash_impulses(self):
-        for index_1 in range(0, len(self._balls)):
-            for index_2 in range(index_1 + 1, len(self._balls)):
-                ball_1 = self._balls[index_1]
-                ball_2 = self._balls[index_2]
+        balls = self._list_all_balls()
+        for index_1 in range(0, len(balls)):
+            for index_2 in range(index_1 + 1, len(balls)):
+                ball_1 = balls[index_1]
+                ball_2 = balls[index_2]
                 if ball_1.collides_with(ball_2):
                     ball_to_ball = QVector2D(ball_1.pos() - ball_2.pos())
                     colliding_direction = ball_to_ball / ball_to_ball.length()
@@ -68,15 +85,16 @@ class ServerScene(QGraphicsScene):
                     ball_2.add_impulse(delta_impulse_2)
 
     def _update_ball_positions(self):
-        for ball in self._balls:
-            force = ball.calculate_sum_force()
-            assert isinstance(force, QVector2D), type(force)
-            distance_to_target = ball.distance_to_target()
-            ball.move_with_force(force)
-            if (distance_to_target is not None) and (distance_to_target < MIN_TARGET_DISTANCE):
-                ball.clear_target()
+        for player in self._server_players:
+            for ball in player.balls:
+                force = ball.calculate_sum_force()
+                assert isinstance(force, QVector2D), type(force)
+                distance_to_target = ball.distance_to_target()
+                ball.move_with_force(force)
+                if (distance_to_target is not None) and (distance_to_target < MIN_TARGET_DISTANCE):
+                    ball.clear_target()
 
     def on_timer_tick(self):
         self._calculate_crash_impulses()
         self._update_ball_positions()
-        self.set_pos_signal.emit(BallsPositions.from_balls(self._balls))
+        self.set_pos_signal.emit(BallsPositions.from_players(self._server_players))

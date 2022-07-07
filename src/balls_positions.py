@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Dict
 from PyQt6.QtCore import QPointF
+from client_player import ClientPlayer
 
 
 class BallPosition:
@@ -12,18 +13,20 @@ class BallPosition:
 
 
 class BallsPositions:
-    def __init__(self, balls_positions: List[BallPosition]):
-        self.balls_positions: List[BallPosition] = balls_positions
+    def __init__(self, player_id_2_ball_position: Dict[int, List[BallPosition]]):
+        self.player_id_2_ball_position: Dict[int, List[BallPosition]] = player_id_2_ball_position
 
     @staticmethod
-    def from_balls(balls: List['ServerBall']):
-        #return BallsPositions(balls_positions=list(map(Ball.get_position, balls)))
-        return BallsPositions(balls_positions=[
-            ball.get_position()
-            for ball in balls
-        ])
+    def from_players(players: List["ServerPlayer"]) -> "BallsPositions":
+        return BallsPositions(player_id_2_ball_position={
+            player.players_id: [ball.get_position() for ball in player.balls]
+            for player in players
+        })
 
-    def set_to_balls(self, balls: List['ClientBall']):
-        assert len(balls) == len(self.balls_positions), (len(balls), len(self.balls_positions))
-        for ball, ball_position in zip(balls, self.balls_positions):
-            ball.setPos(QPointF(ball_position.x, ball_position.y))
+    def set_to_players(self, players: List[ClientPlayer]):
+        assert len(players) == len(self.player_id_2_ball_position)
+        for player in players:
+            ball_positions_to_set = self.player_id_2_ball_position[player.players_id]
+            assert len(ball_positions_to_set) == len(player.balls)
+            for ball, ball_position in zip(player.balls, ball_positions_to_set):
+                ball.setPos(ball_position.to_q_point_f())

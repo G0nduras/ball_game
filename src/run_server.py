@@ -1,57 +1,41 @@
 import sys
-
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QApplication
 from server_ball import ServerBall
 from server_scene import ServerScene
 from udp_handler import UDPHandler
+from server_player import ServerPlayer
+
+PLAYERS_COUNT = 2
 
 
 def run_server():
     app = QApplication(sys.argv)
-    impulse_module = 50000000
-    trust_force_module = 100000
-    resistance_alpha = 50
+    impulse_module = 40000000
+    trust_force_module = 400000
+    resistance_alpha = 700
     density = 1
-    server_balls = [
-            ServerBall(
-                x=200,
-                y=350,
-                radius=100,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                thrust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module/2,
-            ),
-            ServerBall(
-                x=400,
-                y=350,
-                radius=75,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                thrust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module / 4,
-            ),
-            ServerBall(
-                x=550,
-                y=350,
-                radius=50,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                thrust_force_module=trust_force_module,
-                jump_impulse_module=impulse_module / 10,
-            ),
-            ServerBall(
-                x=650,
-                y=350,
-                radius=25,
-                density=density,
-                resistance_alpha=resistance_alpha,
-                thrust_force_module=trust_force_module / 5,
-                jump_impulse_module=impulse_module / 100,
-            ),
-        ]
-    server_scene = ServerScene(server_balls, frame_per_second=60)
+    players = [
+        ServerPlayer(players_id=0, balls=[ServerBall(
+            x=400,
+            y=350,
+            radius=75,
+            density=density,
+            resistance_alpha=resistance_alpha,
+            thrust_force_module=trust_force_module,
+            jump_impulse_module=impulse_module,
+        )]),
+        ServerPlayer(players_id=1, balls=[ServerBall(
+            x=400 * 2,
+            y=350,
+            radius=75,
+            density=density,
+            resistance_alpha=resistance_alpha,
+            thrust_force_module=trust_force_module,
+            jump_impulse_module=impulse_module,
+        )]),
+    ]
+    server_scene = ServerScene(server_players=players, frame_per_second=60)
     server_udp_handler = UDPHandler(
         target_port=7777,
         listening_port=8888,

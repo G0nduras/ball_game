@@ -1,5 +1,4 @@
 import sys
-
 from PyQt6.QtCore import QRectF, QPointF, QSizeF, Qt
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QApplication, QAbstractScrollArea
@@ -7,41 +6,32 @@ from ball_widget import BallWidget
 from client_ball import ClientBall
 from client_scene import ClientScene
 from udp_handler import UDPHandler
+from client_player import ClientPlayer
+
+
+PLAYERS_COUNT = 2
+PLAYER_ID = 0
 
 
 def run_client():
     app = QApplication(sys.argv)
-    client_balls = [
-            ClientBall(
-                x=200,
-                y=350,
-                default_color="red",
-                hover_color="darkred",
-                radius=100,
-            ),
-            ClientBall(
-                x=400,
-                y=350,
-                default_color="blue",
-                hover_color="darkblue",
-                radius=75,
-            ),
-            ClientBall(
-                x=550,
-                y=350,
-                default_color="green",
-                hover_color="darkgreen",
-                radius=50,
-            ),
-            ClientBall(
-                x=650,
-                y=350,
-                default_color="orange",
-                hover_color="darkorange",
-                radius=25,
-            ),
-        ]
-    client_scene = ClientScene(client_balls)
+    players = [
+        ClientPlayer(players_id=0, balls=[ClientBall(
+            x=400,
+            y=350,
+            default_color="blue",
+            hover_color="darkblue",
+            radius=75,
+        )]),
+        ClientPlayer(players_id=1, balls=[ClientBall(
+            x=400 * 2,
+            y=350,
+            default_color="blue",
+            hover_color="darkblue",
+            radius=75,
+        )]),
+    ]
+    client_scene = ClientScene(client_players=players, player_id=PLAYER_ID)
     client_udp_handler = UDPHandler(
         target_port=8888,
         listening_port=7777,
