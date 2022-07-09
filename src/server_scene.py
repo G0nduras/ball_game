@@ -77,8 +77,8 @@ class ServerScene(QGraphicsScene):
                     e_0 = (m1 * (v_1 ** 2)) / 2 + (m2 * (v_2 ** 2)) / 2
                     p_0 = m1 * v_1 + m2 * v_2
                     discriminant = sqrt(m1 * m2) * sqrt(2 * e_0 * (m1 + m2) - p_0 ** 2)
-                    final_velocity_projection_1 = (p_0 * m1 - discriminant) / (m1 * (m1 + m2))
-                    final_velocity_projection_2 = (p_0 * m2 + discriminant) / (m2 * (m1 + m2))
+                    final_velocity_projection_1 = (p_0 * m1 + discriminant) / (m1 * (m1 + m2))
+                    final_velocity_projection_2 = (p_0 * m2 - discriminant) / (m2 * (m1 + m2))
                     delta_impulse_1 = (m1 * final_velocity_projection_1 - impulse_projection_1) * colliding_direction
                     delta_impulse_2 = (m2 * final_velocity_projection_2 - impulse_projection_2) * colliding_direction
                     ball_1.add_impulse(delta_impulse_1)

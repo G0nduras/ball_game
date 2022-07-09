@@ -8,8 +8,10 @@ from server_scene import ServerScene
 from udp_handler import UDPHandler
 from server_player import ServerPlayer
 
+
 PLAYERS_COUNT = 2
 SERVER_CONFIG_PATH = "server_config.yaml"
+REMOTE_CLIENT_IP = "192.168.31.168"
 
 
 def run_server():
@@ -35,10 +37,16 @@ def run_server():
             jump_impulse_module=conf.impulse_module,
         )]),
     ]
-    server_scene = ServerScene(server_players=players, frame_per_second=60)
+    server_scene = ServerScene(server_players=players, frame_per_second=20)
     server_udp_handler = UDPHandler(
-        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=7777)],
-        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=8888)],
+        listening_net_addresses=[
+            NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12340),
+            NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12341),
+        ],
+        target_net_addresses=[
+            NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12342),
+            NetAddress(host=QHostAddress(REMOTE_CLIENT_IP), port=12343),
+        ],
     )
     server_udp_handler.jump_signal.connect(server_scene.set_jump)
     server_udp_handler.set_target_signal.connect(server_scene.set_target_for_selected_balls)

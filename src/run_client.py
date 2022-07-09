@@ -12,6 +12,7 @@ from client_player import ClientPlayer
 
 
 PLAYERS_COUNT = 2
+SERVER_IP = "192.168.31.94"
 PLAYER_ID = 0
 
 
@@ -34,10 +35,24 @@ def run_client():
         )]),
     ]
     client_scene = ClientScene(client_players=players, player_id=PLAYER_ID)
-    client_udp_handler = UDPHandler(
-        listening_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=8888)],
-        target_net_addresses=[NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=7777)],
-    )
+    if PLAYER_ID == 0:
+        client_udp_handler = UDPHandler(
+            listening_net_addresses=[
+                NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12342),
+            ],
+            target_net_addresses=[
+                NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12340),
+            ],
+        )
+    else:
+        client_udp_handler = UDPHandler(
+            listening_net_addresses=[
+                NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12343),
+            ],
+            target_net_addresses=[
+                NetAddress(host=QHostAddress(SERVER_IP), port=12341),
+            ],
+        )
     client_scene.jump_signal.connect(client_udp_handler.send_obj)
     client_scene.set_target_signal.connect(client_udp_handler.send_obj)
     client_udp_handler.set_pos_signal.connect(client_scene.get_balls_position)
