@@ -10,7 +10,7 @@ from server_player import ServerPlayer
 
 
 PLAYERS_COUNT = 2
-SERVER_CONFIG_PATH = "server/server_config.yaml"
+SERVER_CONFIG_PATH = "server_config.yaml"
 REMOTE_CLIENT_IP = "127.0.0.1"
 
 

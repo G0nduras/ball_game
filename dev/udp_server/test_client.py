@@ -25,4 +25,3 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     server = UDPClient()
     sys.exit(app.exec())
-
