@@ -12,13 +12,11 @@ class ClientBall(QGraphicsEllipseItem):
             x: int,
             y: int,
             default_color: str,
-            hover_color: str,
             radius: int,
     ):
         super().__init__(-radius, - radius, radius * 2, radius * 2)
         self.setPos(QPointF(x, y))
         self._default_color = default_color
-        self._hover_color = hover_color
         self._radius = radius
 
     def add_ball_to_scene(self, scene: QGraphicsScene):

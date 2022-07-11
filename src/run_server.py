@@ -11,7 +11,7 @@ from server_player import ServerPlayer
 
 PLAYERS_COUNT = 2
 SERVER_CONFIG_PATH = "server_config.yaml"
-REMOTE_CLIENT_IP = "192.168.31.168"
+REMOTE_CLIENT_IP = "127.0.0.1"
 
 
 def run_server():
@@ -37,7 +37,7 @@ def run_server():
             jump_impulse_module=conf.impulse_module,
         )]),
     ]
-    server_scene = ServerScene(server_players=players, frame_per_second=20)
+    server_scene = ServerScene(server_players=players, frame_per_second=60)
     server_udp_handler = UDPHandler(
         listening_net_addresses=[
             NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12340),

@@ -12,7 +12,7 @@ from client_player import ClientPlayer
 
 
 PLAYERS_COUNT = 2
-SERVER_IP = "192.168.31.94"
+SERVER_IP = "127.0.0.1"
 PLAYER_ID = 0
 
 
@@ -23,14 +23,12 @@ def run_client():
             x=400,
             y=350,
             default_color="blue",
-            hover_color="darkblue",
             radius=75,
         )]),
         ClientPlayer(players_id=1, balls=[ClientBall(
             x=400 * 2,
             y=350,
             default_color="red",
-            hover_color="darkred",
             radius=75,
         )]),
     ]
