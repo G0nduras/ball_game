@@ -1,24 +1,15 @@
 from typing import List, Dict
-from PyQt6.QtCore import QPointF
-from client_player import ClientPlayer
+from client.client_player import ClientPlayer
+from network.ball_position import BallPosition
 
 
-class BallPosition:
-    def __init__(self, x: float, y: float):
-        self.x = x
-        self.y = y
-
-    def to_q_point_f(self):
-        return QPointF(self.x, self.y)
-
-
-class BallsPositions:
+class BallsPositionsMessage:
     def __init__(self, player_id_2_ball_position: Dict[int, List[BallPosition]]):
         self.player_id_2_ball_position: Dict[int, List[BallPosition]] = player_id_2_ball_position
 
     @staticmethod
-    def from_players(players: List["ServerPlayer"]) -> "BallsPositions":
-        return BallsPositions(player_id_2_ball_position={
+    def from_players(players: List["ServerPlayer"]) -> "BallsPositionsMessage":
+        return BallsPositionsMessage(player_id_2_ball_position={
             player.players_id: [ball.get_position() for ball in player.balls]
             for player in players
         })

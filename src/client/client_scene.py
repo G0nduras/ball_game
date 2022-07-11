@@ -1,12 +1,12 @@
 from typing import List
 from PyQt6.QtCore import QPointF, Qt, pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QGraphicsScene
+from src.network.balls_positions import BallsPositionsMessage, BallPosition
+from src.network.targets_for_balls_message import TargetsForBallsMessage
+from src.network.jump_message import JumpMessage
+from client_player import ClientPlayer
 from client_ball import ClientBall
 from selecting_rect import SelectingRect
-from balls_positions import BallsPositions, BallPosition
-from targets_for_selected_balls import TargetsForBallsMessage
-from client_player import ClientPlayer
-from jump_message import JumpMessage
 
 
 class ClientScene(QGraphicsScene):
@@ -81,6 +81,6 @@ class ClientScene(QGraphicsScene):
                 )
                 self.set_target_signal.emit(targets)
 
-    @pyqtSlot(BallsPositions)
-    def get_balls_position(self, positions: BallsPositions):
+    @pyqtSlot(BallsPositionsMessage)
+    def get_balls_position(self, positions: BallsPositionsMessage):
         positions.set_to_players(self._client_players)

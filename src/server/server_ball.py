@@ -3,7 +3,7 @@ from typing import Optional
 from PyQt6.QtCore import QPointF
 from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsScene
-from balls_positions import BallPosition
+from src.network.balls_positions import BallPosition
 
 DEFAULT_PEN_WIDTH = 0
 SELECTED_PEN_WIDTH = 2

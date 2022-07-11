@@ -1,16 +1,16 @@
 from typing import Union, List
 from PyQt6.QtCore import QObject, pyqtSignal, QByteArray
-from balls_positions import BallsPositions
-from jump_message import JumpMessage
-from net_address import NetAddress
-from targets_for_selected_balls import TargetsForBallsMessage
-from udp_message_translator import UDPMessageTranslator
+from src.network.balls_positions import BallsPositionsMessage
+from src.network.jump_message import JumpMessage
+from src.network.net_address import NetAddress
+from src.network.targets_for_balls_message import TargetsForBallsMessage
+from src.network.udp_message_translator import UDPMessageTranslator
 
 
 class UDPHandler(QObject):
     jump_signal = pyqtSignal(JumpMessage)
     set_target_signal = pyqtSignal(TargetsForBallsMessage)
-    set_pos_signal = pyqtSignal(BallsPositions)
+    set_pos_signal = pyqtSignal(BallsPositionsMessage)
 
     def __init__(
             self,
@@ -36,14 +36,14 @@ class UDPHandler(QObject):
                 datagram.resize(socket.pendingDatagramSize())
                 message_bytes, _, _ = socket.readDatagram(datagram.size())
                 obj = UDPMessageTranslator.from_bytes(message_bytes)
-                if isinstance(obj, BallsPositions):
+                if isinstance(obj, BallsPositionsMessage):
                     self.set_pos_signal.emit(obj)
                 elif isinstance(obj, TargetsForBallsMessage):
                     self.set_target_signal.emit(obj)
                 else:
                     self.jump_signal.emit(obj)
 
-    def send_obj(self, obj=Union[BallsPositions, JumpMessage, TargetsForBallsMessage]):
+    def send_obj(self, obj=Union[BallsPositionsMessage, JumpMessage, TargetsForBallsMessage]):
         obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
         for socket in self._target_sockets:
             socket.write(obj_in_bytes)

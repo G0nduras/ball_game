@@ -2,15 +2,15 @@ import sys
 from omegaconf import OmegaConf
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QApplication
-from net_address import NetAddress
+from network.net_address import NetAddress
 from server_ball import ServerBall
 from server_scene import ServerScene
-from udp_handler import UDPHandler
+from src.network.udp_handler import UDPHandler
 from server_player import ServerPlayer
 
 
 PLAYERS_COUNT = 2
-SERVER_CONFIG_PATH = "server_config.yaml"
+SERVER_CONFIG_PATH = "server/server_config.yaml"
 REMOTE_CLIENT_IP = "127.0.0.1"
 
 

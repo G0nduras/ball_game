@@ -1,13 +1,12 @@
 import sys
-from omegaconf import OmegaConf
 from PyQt6.QtCore import QRectF, QPointF, QSizeF, Qt
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QApplication, QAbstractScrollArea
 from ball_widget import BallWidget
 from client_ball import ClientBall
 from client_scene import ClientScene
-from net_address import NetAddress
-from udp_handler import UDPHandler
+from network.net_address import NetAddress
+from src.network.udp_handler import UDPHandler
 from client_player import ClientPlayer
 
 

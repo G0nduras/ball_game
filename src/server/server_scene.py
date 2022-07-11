@@ -4,10 +4,10 @@ from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QVector2D
 from PyQt6.QtWidgets import QGraphicsScene
 from server_ball import ServerBall
-from balls_positions import BallsPositions
-from targets_for_selected_balls import TargetsForBallsMessage
+from src.network.balls_positions import BallsPositionsMessage
+from src.network.targets_for_balls_message import TargetsForBallsMessage
 from server_player import ServerPlayer
-from jump_message import JumpMessage
+from src.network.jump_message import JumpMessage
 
 
 MIN_TARGET_DISTANCE = 2
@@ -15,7 +15,7 @@ MIN_TARGET_DISTANCE = 2
 
 class ServerScene(QGraphicsScene):
     MS_IN_S = 1000
-    set_pos_signal = pyqtSignal(BallsPositions)
+    set_pos_signal = pyqtSignal(BallsPositionsMessage)
 
     def __init__(
             self,
@@ -97,4 +97,4 @@ class ServerScene(QGraphicsScene):
     def on_timer_tick(self):
         self._calculate_crash_impulses()
         self._update_ball_positions()
-        self.set_pos_signal.emit(BallsPositions.from_players(self._server_players))
+        self.set_pos_signal.emit(BallsPositionsMessage.from_players(self._server_players))
