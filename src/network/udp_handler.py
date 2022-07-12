@@ -15,33 +15,28 @@ class UDPHandler(QObject):
     def __init__(
             self,
             target_net_addresses: List[NetAddress],
-            listening_net_addresses: List[NetAddress],
+            listening_net_address: NetAddress,
     ):
         super().__init__()
         self._target_sockets = [
             target_net_address.connect_upd_socket(self)
             for target_net_address in target_net_addresses
         ]
-        self._listening_sockets = [
-            listening_net_address.bind_upd_socket(self)
-            for listening_net_address in listening_net_addresses
-        ]
-        for socket in self._listening_sockets:
-            socket.readyRead.connect(self.receive_bytes)
+        self._listening_socket = listening_net_address.bind_upd_socket(self)
+        self._listening_socket.readyRead.connect(self.receive_bytes)
 
     def receive_bytes(self):
-        for socket in self._listening_sockets:
-            while socket.hasPendingDatagrams():
-                datagram = QByteArray()
-                datagram.resize(socket.pendingDatagramSize())
-                message_bytes, _, _ = socket.readDatagram(datagram.size())
-                obj = UDPMessageTranslator.from_bytes(message_bytes)
-                if isinstance(obj, BallsPositionsMessage):
-                    self.set_pos_signal.emit(obj)
-                elif isinstance(obj, TargetsForBallsMessage):
-                    self.set_target_signal.emit(obj)
-                else:
-                    self.jump_signal.emit(obj)
+        while self._listening_socket.hasPendingDatagrams():
+            datagram = QByteArray()
+            datagram.resize(self._listening_socket.pendingDatagramSize())
+            message_bytes, _, _ = self._listening_socket.readDatagram(datagram.size())
+            obj = UDPMessageTranslator.from_bytes(message_bytes)
+            if isinstance(obj, BallsPositionsMessage):
+                self.set_pos_signal.emit(obj)
+            elif isinstance(obj, TargetsForBallsMessage):
+                self.set_target_signal.emit(obj)
+            else:
+                self.jump_signal.emit(obj)
 
     def send_obj(self, obj=Union[BallsPositionsMessage, JumpMessage, TargetsForBallsMessage]):
         obj_in_bytes = UDPMessageTranslator.to_bytes(obj)

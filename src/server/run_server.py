@@ -39,10 +39,7 @@ def run_server():
     ]
     server_scene = ServerScene(server_players=players, frame_per_second=60)
     server_udp_handler = UDPHandler(
-        listening_net_addresses=[
-            NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12340),
-            NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12341),
-        ],
+        listening_net_address=NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12341),
         target_net_addresses=[
             NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12342),
             NetAddress(host=QHostAddress(REMOTE_CLIENT_IP), port=12343),

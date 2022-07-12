@@ -34,18 +34,14 @@ def run_client():
     client_scene = ClientScene(client_players=players, player_id=PLAYER_ID)
     if PLAYER_ID == 0:
         client_udp_handler = UDPHandler(
-            listening_net_addresses=[
-                NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12342),
-            ],
+            listening_net_address=NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12342),
             target_net_addresses=[
-                NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12340),
+                NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12341),
             ],
         )
     else:
         client_udp_handler = UDPHandler(
-            listening_net_addresses=[
-                NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12343),
-            ],
+            listening_net_address=NetAddress(host=QHostAddress.SpecialAddress.LocalHost, port=12343),
             target_net_addresses=[
                 NetAddress(host=QHostAddress(SERVER_IP), port=12341),
             ],
