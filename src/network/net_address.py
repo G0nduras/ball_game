@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QObject
-from PyQt6.QtNetwork import QHostAddress, QUdpSocket
+from PyQt6.QtNetwork import QHostAddress, QUdpSocket, QTcpSocket
 
 
 class NetAddress:
@@ -16,4 +16,9 @@ class NetAddress:
     def bind_upd_socket(self, q_object) -> QUdpSocket:
         socket = QUdpSocket(q_object)
         socket.bind(self._host, self._port)
+        return socket
+
+    def connect_tcp_socket(self, q_object) -> QTcpSocket:
+        socket = QTcpSocket(q_object)
+        socket.connectToHost(self._host, self._port)
         return socket
