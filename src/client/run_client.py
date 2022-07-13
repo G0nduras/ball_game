@@ -1,7 +1,7 @@
 import sys
-from PyQt6.QtWidgets import QApplication
-from client.client import Client
 from omegaconf import OmegaConf
+from PyQt6.QtWidgets import QApplication
+from src.client.client import Client
 
 
 CLIENT_CONFIG_PATH = "client_config.yaml"

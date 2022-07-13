@@ -1,5 +1,5 @@
 from typing import List
-from client.client_ball import ClientBall
+from src.client.client_ball import ClientBall
 
 
 class ClientPlayer:

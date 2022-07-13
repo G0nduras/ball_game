@@ -1,7 +1,7 @@
 import sys
 from omegaconf import OmegaConf
 from PyQt6.QtWidgets import QApplication
-from server.server import Server
+from src.server.server import Server
 
 
 SERVER_CONFIG_PATH = "server_config.yaml"

@@ -1,6 +1,6 @@
 from typing import List, Dict
-from client.client_player import ClientPlayer
-from network.ball_position import BallPosition
+from src.client.client_player import ClientPlayer
+from src.network.ball_position import BallPosition
 
 
 class BallsPositionsMessage:

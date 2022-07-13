@@ -1,15 +1,17 @@
 from typing import List
 
-from PyQt6.QtNetwork import QHostAddress
-from network.net_address import NetAddress
-from network.new_client_info_message import NewClientInfoMessage
-from network.tcp_handler import TCPHandler
-from network.udp_handler import UDPHandler
 from omegaconf import DictConfig
-from server.server_ball import ServerBall
-from server.server_player import ServerPlayer
-from server.server_scene import ServerScene
-from network.new_client_message import NewClientMessage
+
+from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtNetwork import QHostAddress
+from src.network.net_address import NetAddress
+from src.network.new_client_info_message import NewClientInfoMessage
+from src.network.tcp_handler import TCPHandler
+from src.network.udp_handler import UDPHandler
+from src.network.new_client_message import NewClientMessage
+from src.server.server_ball import ServerBall
+from src.server.server_player import ServerPlayer
+from src.server.server_scene import ServerScene
 
 
 class Server:
@@ -26,7 +28,9 @@ class Server:
         self._udp_handler.jump_signal.connect(self._server_scene.set_jump)
         self._udp_handler.set_target_signal.connect(self._server_scene.set_target_for_selected_balls)
         self._server_scene.set_pos_signal.connect(self._udp_handler.send_obj)
+        self._tcp_handler.new_client_signal.connect(self.process_new_client)
 
+    @pyqtSlot(NewClientMessage)
     def process_new_client(self, new_client_message: NewClientMessage):
         player_id = self._server_scene.get_new_player_id()
         self._server_scene.add_player(player=ServerPlayer(players_id=player_id, balls=List[ServerBall(

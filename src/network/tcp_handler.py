@@ -1,7 +1,7 @@
 from typing import Union, List
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtNetwork import QTcpSocket, QAbstractSocket, QHostAddress, QTcpServer
-from network.new_client_info_message import NewClientInfoMessage
+from src.network.new_client_info_message import NewClientInfoMessage
 from src.network.udp_message_translator import UDPMessageTranslator
 from src.network.net_address import NetAddress
 from src.network.new_player_message import NewPlayerMessage
