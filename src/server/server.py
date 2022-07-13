@@ -47,7 +47,11 @@ class Server:
             host=QHostAddress(new_client_message.tcp_host),
             port=new_client_message.tcp_port,
         ))
+        other_players = [
+            player.create_new_player_message()
+            for player in self._server_scene._server_players
+        ]
         self._tcp_handler.send_obj_to_last(NewClientInfoMessage(
             player_id=player_id,
-            other_players=List[ServerPlayer.create_new_player_message(self)],
+            other_players=other_players,
         ))

@@ -1,4 +1,9 @@
-listening_host: 127.0.0.1
-target_host: 127.0.0.1
-listening_port: 8888
-target_port: 7777
+udp_port: 123457
+tcp_port: 12348
+server_host: localhost
+server_udp_port: 12345
+server_tcp_port: 12346
+ball_radius: 75
+ball_color: red
+ball_spawn_x: 100
+ball_spawn_y: 100

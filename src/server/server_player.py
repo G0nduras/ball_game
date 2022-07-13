@@ -13,7 +13,6 @@ class ServerPlayer:
         self.players_id = players_id
         self.balls: List[ServerBall] = balls
 
-    @staticmethod
     def create_new_player_message(self) -> NewPlayerMessage:
         assert len(self.balls) == 1
         ball = self.balls[0]

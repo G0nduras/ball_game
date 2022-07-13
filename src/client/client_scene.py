@@ -25,7 +25,7 @@ class ClientScene(QGraphicsScene):
 
         self._selecting_rect.add_rect_to_scene(self)
 
-    def add_player(self, player):
+    def add_player(self, player: ClientPlayer):
         self._client_players.append(player)
         for ball in player.balls:
             ball.add_ball_to_scene(self)
