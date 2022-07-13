@@ -15,20 +15,20 @@ class ClientScene(QGraphicsScene):
 
     def __init__(
             self,
-            client_players: List[ClientPlayer],
             player_id: int
     ):
         super().__init__()
-        self._client_players: List[ClientPlayer] = client_players
+        self._client_players: List[ClientPlayer] = []
         self._selected_balls: List[ClientBall] = []
         self._selecting_rect: SelectingRect = SelectingRect()
         self._player_id = player_id
 
-        for player in client_players:
-            for ball in player.balls:
-                ball.add_ball_to_scene(self)
-
         self._selecting_rect.add_rect_to_scene(self)
+
+    def add_player(self, player):
+        self._client_players.append(player)
+        for ball in player.balls:
+            ball.add_ball_to_scene(self)
 
     def key_press_event(self, event):
         if event.key() == Qt.Key.Key_Space:

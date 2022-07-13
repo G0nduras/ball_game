@@ -1,6 +1,7 @@
 from typing import Union, List
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtNetwork import QTcpSocket, QAbstractSocket, QHostAddress, QTcpServer
+from network.new_client_info_message import NewClientInfoMessage
 from src.network.udp_message_translator import UDPMessageTranslator
 from src.network.net_address import NetAddress
 from src.network.new_player_message import NewPlayerMessage
@@ -10,6 +11,7 @@ from src.network.new_client_message import NewClientMessage
 class TCPHandler(QTcpServer):
     new_player_signal = pyqtSignal(NewPlayerMessage)
     new_client_signal = pyqtSignal(NewClientMessage)
+    new_client_info_signal = pyqtSignal(NewClientInfoMessage)
 
     def __init__(
             self,
@@ -43,8 +45,13 @@ class TCPHandler(QTcpServer):
     def add_target_address(self, target_net_address: NetAddress):
         self._target_net_addresses.append(target_net_address)
 
-    def write_obj(self, obj: Union[NewPlayerMessage, NewClientMessage]):
+    def send_obj_to_all(self, obj: Union[NewPlayerMessage, NewClientMessage]):
         for target_net_address in self._target_net_addresses:
             obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
             socket = target_net_address.connect_tcp_socket(self)
             socket.write(obj_in_bytes)
+
+    def send_obj_to_last(self, obj: Union[NewPlayerMessage, NewClientMessage, NewClientInfoMessage]):
+        obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
+        socket = self._target_net_addresses[-1].connect_tcp_socket(self)
+        socket.write(obj_in_bytes)

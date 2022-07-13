@@ -19,7 +19,6 @@ class ServerScene(QGraphicsScene):
 
     def __init__(
             self,
-            server_players: List[ServerPlayer],
             frame_per_second: int,
     ):
         super().__init__()
@@ -27,11 +26,15 @@ class ServerScene(QGraphicsScene):
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer_tick)
         self.timer.start(round(ServerScene.MS_IN_S / frame_per_second))
-        self._server_players: List[ServerPlayer] = server_players
+        self._server_players: List[ServerPlayer] = []
 
-        for player in server_players:
-            for ball in player.balls:
-                ball.add_ball_to_scene(self)
+    def get_new_player_id(self):
+        return len(self._server_players)
+
+    def add_player(self, player: ServerPlayer):
+        self._server_players.append(player)
+        for ball in player.balls:
+            ball.add_ball_to_scene(self)
 
     @pyqtSlot(JumpMessage)
     def set_jump(self, jump_message: JumpMessage):
