@@ -20,13 +20,13 @@ class TCPHandler(QTcpServer):
 
         self.listen(QHostAddress.SpecialAddress.Any, listening_port)
         self.newConnection.connect(self.new_connection)
-        self.sockets = []
+        self._sockets = []
 
     def new_connection(self):
         client_socket: QTcpSocket = self.nextPendingConnection()
         client_socket.readyRead.connect(self.receive_bytes)
         client_socket.stateChanged.connect(self.on_socket_change)
-        self.sockets.append(client_socket)
+        self._sockets.append(client_socket)
 
     def receive_bytes(self):
         sender = self.sender()
@@ -38,7 +38,7 @@ class TCPHandler(QTcpServer):
     def on_socket_change(self, socket_state):
         if socket_state == QAbstractSocket.SocketState.UnconnectedState:
             sender = self.sender()
-            self.sockets.remove(sender)
+            self._sockets.remove(sender)
 
     def add_target_address(self, target_net_address: NetAddress):
         self._target_net_addresses.append(target_net_address)

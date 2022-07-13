@@ -1,5 +1,6 @@
 from typing import Union, List
 from PyQt6.QtCore import QObject, pyqtSignal, QByteArray
+from PyQt6.QtNetwork import QHostAddress, QUdpSocket
 from src.network.balls_positions import BallsPositionsMessage
 from src.network.jump_message import JumpMessage
 from src.network.net_address import NetAddress
@@ -14,16 +15,22 @@ class UDPHandler(QObject):
 
     def __init__(
             self,
-            target_net_addresses: List[NetAddress],
-            listening_net_address: NetAddress,
+            listening_port: int,
     ):
         super().__init__()
-        self._target_sockets = [
-            target_net_address.connect_upd_socket(self)
-            for target_net_address in target_net_addresses
-        ]
-        self._listening_socket = listening_net_address.bind_upd_socket(self)
+        self._target_net_addresses: List[NetAddress] = []
+        self._target_sockets: List[QUdpSocket] = []
+        self._listening_net_address: NetAddress = NetAddress(
+            host=QHostAddress.SpecialAddress.LocalHost,
+            port=listening_port
+        )
+        self._listening_socket = self._listening_net_address.bind_upd_socket(self)
         self._listening_socket.readyRead.connect(self.receive_bytes)
+
+    def add_target_address(self, target_net_address: NetAddress):
+        self._target_net_addresses.append(target_net_address)
+        new_target_socket = target_net_address.connect_upd_socket(self)
+        self._target_sockets.append(new_target_socket)
 
     def receive_bytes(self):
         while self._listening_socket.hasPendingDatagrams():
