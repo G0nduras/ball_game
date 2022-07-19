@@ -15,7 +15,8 @@ class BallsPositionsMessage:
         })
 
     def set_to_players(self, players: List[ClientPlayer]):
-        assert len(players) == len(self.player_id_2_ball_position)
+        if len(players) != len(self.player_id_2_ball_position):
+            return
         for player in players:
             ball_positions_to_set = self.player_id_2_ball_position[player.players_id]
             assert len(ball_positions_to_set) == len(player.balls)

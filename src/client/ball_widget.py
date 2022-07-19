@@ -1,14 +1,18 @@
+from typing import Optional
+
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QGraphicsView
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene
 from client_scene import ClientScene
 
 
 class BallWidget(QGraphicsView):
     def __init__(
             self,
-            client_scene: ClientScene
     ):
         super().__init__()
+        self._scene: Optional[QGraphicsScene] = None
+
+    def set_scene(self, client_scene: ClientScene):
         self._scene = client_scene
         self.setScene(self._scene)
 

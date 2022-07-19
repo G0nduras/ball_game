@@ -18,8 +18,8 @@ class ServerPlayer:
         ball = self.balls[0]
         return NewPlayerMessage(
             player_id=self.players_id,
-            spawn_x=ball.x,
-            spawn_y=ball.y,
-            default_color=ball.defauil_color,
-            radius=ball.radius,
+            spawn_x=round(ball.pos().x()),
+            spawn_y=round(ball.pos().y()),
+            radius=ball._radius,
+            default_color="red",
         )

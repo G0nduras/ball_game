@@ -2,7 +2,7 @@ from typing import List
 
 from omegaconf import DictConfig
 
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, QObject
 from PyQt6.QtNetwork import QHostAddress
 from src.network.net_address import NetAddress
 from src.network.new_client_info_message import NewClientInfoMessage
@@ -14,11 +14,12 @@ from src.server.server_player import ServerPlayer
 from src.server.server_scene import ServerScene
 
 
-class Server:
+class Server(QObject):
     def __init__(
             self,
             server_conf: DictConfig,
     ):
+        super().__init__()
         self._server_conf = server_conf
 
         self._server_scene: ServerScene = ServerScene(frame_per_second=server_conf.frame_per_second)
@@ -33,7 +34,7 @@ class Server:
     @pyqtSlot(NewClientMessage)
     def process_new_client(self, new_client_message: NewClientMessage):
         player_id = self._server_scene.get_new_player_id()
-        self._server_scene.add_player(player=ServerPlayer(players_id=player_id, balls=List[ServerBall(
+        self._server_scene.add_player(player=ServerPlayer(players_id=player_id, balls=[ServerBall(
             x=new_client_message.spawn_x,
             y=new_client_message.spawn_y,
             radius=new_client_message.radius,

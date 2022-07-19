@@ -1,6 +1,6 @@
 from typing import Optional
 
-from PyQt6.QtCore import QRectF, QSizeF, QPointF, Qt, pyqtSlot
+from PyQt6.QtCore import QRectF, QSizeF, QPointF, Qt, pyqtSlot, QObject
 from PyQt6.QtNetwork import QHostAddress
 from PyQt6.QtWidgets import QAbstractScrollArea
 
@@ -18,11 +18,12 @@ from src.network.tcp_handler import TCPHandler
 from src.network.udp_handler import UDPHandler
 
 
-class Client:
+class Client(QObject):
     def __init__(
             self,
             client_conf: DictConfig,
     ):
+        super().__init__()
         self._client_conf = client_conf
         self._client_scene: Optional[ClientScene] = None
 
@@ -36,6 +37,8 @@ class Client:
             host=QHostAddress(client_conf.server_host),
             port=client_conf.server_tcp_port,
         ))
+        self._tcp_handler.new_client_info_signal.connect(self.process_new_client_info_message)
+        self._tcp_handler.new_player_signal.connect(self.process_new_player)
 
         self._tcp_handler.send_obj_to_last(NewClientMessage(
             spawn_x=self._client_conf.ball_spawn_x,
@@ -47,8 +50,15 @@ class Client:
             udp_host=self._client_conf.client_host,
             udp_port=self._client_conf.client_udp_port,
         ))
-        self._tcp_handler.new_client_info_signal.connect(self.process_new_client_info_message)
-        self._tcp_handler.new_player_signal.connect(self.process_new_player)
+        self._widget = BallWidget()
+        self._widget.setWindowTitle("BallGame")
+        self._widget.setMouseTracking(True)
+        self._widget.showFullScreen()
+        widget_size = self._widget.size()
+        self._widget.setSceneRect(QRectF(QPointF(0, 0), QSizeF(widget_size)))
+        self._widget.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContentsOnFirstShow)
+        self._widget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     @pyqtSlot(NewPlayerMessage)
     def process_new_player(self, new_player: NewPlayerMessage):
@@ -87,15 +97,7 @@ class Client:
             )])
             self._client_scene.add_player(client_player)
 
-        widget = BallWidget(client_scene=self._client_scene)
-        widget.setWindowTitle("BallGame")
-        widget.setMouseTracking(True)
-        widget.showFullScreen()
-        widget_size = widget.size()
-        widget.setSceneRect(QRectF(QPointF(0, 0), QSizeF(widget_size)))
-        widget.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContentsOnFirstShow)
-        widget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._widget.set_scene(client_scene=self._client_scene)
 
         self._client_scene.jump_signal.connect(self._udp_handler.send_obj)
         self._client_scene.set_target_signal.connect(self._udp_handler.send_obj)

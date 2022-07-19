@@ -1,7 +1,7 @@
-client_host: locahost
+client_host: 127.0.0.1
 client_udp_port: 12347
 client_tcp_port: 12348
-server_host: localhost
+server_host: 127.0.0.1
 server_udp_port: 12345
 server_tcp_port: 12346
 ball_radius: 75
