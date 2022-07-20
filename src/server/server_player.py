@@ -15,11 +15,11 @@ class ServerPlayer:
 
     def create_new_player_message(self) -> NewPlayerMessage:
         assert len(self.balls) == 1
-        ball = self.balls[0]
+        ball: ServerBall = self.balls[0]
         return NewPlayerMessage(
             player_id=self.players_id,
             spawn_x=round(ball.pos().x()),
             spawn_y=round(ball.pos().y()),
             radius=ball._radius,
-            default_color="red",
+            default_color=ball._ball_color,
         )

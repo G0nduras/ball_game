@@ -19,6 +19,7 @@ class ServerBall(QGraphicsEllipseItem):
             density: float,
             thrust_force_module: float,
             jump_impulse_module: float,
+            ball_color: str,
     ):
         super().__init__(-radius, - radius, radius * 2, radius * 2)
         self.setPos(QPointF(x, y))
@@ -33,6 +34,7 @@ class ServerBall(QGraphicsEllipseItem):
         self._thrust_force_module = thrust_force_module
         self._impulse: QVector2D = QVector2D(0, 0)
         self._jump_impulse_module = jump_impulse_module
+        self._ball_color = ball_color
 
     def add_ball_to_scene(self, scene: QGraphicsScene):
         scene.addItem(self)

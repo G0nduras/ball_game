@@ -59,4 +59,5 @@ class Server(QObject):
             resistance_alpha=self._server_conf.resistance_alpha,
             thrust_force_module=self._server_conf.trust_force_module,
             jump_impulse_module=self._server_conf.impulse_module,
+            ball_color=new_client_message.default_color,
         )]))

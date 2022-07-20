@@ -44,6 +44,7 @@ class ClientScene(QGraphicsScene):
     def mouse_move_event(self, event):
         if not self._selecting_rect.is_none():
             self._selecting_rect.expand_rect(event.pos())
+            self.update()
 
     def mouse_release_event(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -61,7 +62,8 @@ class ClientScene(QGraphicsScene):
             for player in self._client_players:
                 for ball in player.balls:
                     ball.set_draw_method(is_selected=ball in self._selected_balls)
-                self._selecting_rect.clear_rect()
+            self._selecting_rect.clear_rect()
+            self.update()
 
     def mouse_press_event(self, event):
         if event.buttons() == Qt.MouseButton.LeftButton:
