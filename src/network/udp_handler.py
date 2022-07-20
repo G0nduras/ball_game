@@ -21,13 +21,14 @@ class UDPHandler(QObject):
         self._target_net_addresses: List[NetAddress] = []
         self._target_sockets: List[QUdpSocket] = []
         self._listening_net_address: NetAddress = NetAddress(
-            host=QHostAddress.SpecialAddress.LocalHost,
-            port=listening_port
+            host=QHostAddress("127.0.0.1"),
+            port=listening_port,
         )
         self._listening_socket = self._listening_net_address.bind_upd_socket(self)
         self._listening_socket.readyRead.connect(self.receive_bytes)
 
     def add_target_address(self, target_net_address: NetAddress):
+        print("UDPHandler: add_target_address, host:", target_net_address._host, "port:", target_net_address._port)
         self._target_net_addresses.append(target_net_address)
         new_target_socket = target_net_address.connect_upd_socket(self)
         self._target_sockets.append(new_target_socket)
@@ -46,6 +47,7 @@ class UDPHandler(QObject):
                 self.jump_signal.emit(obj)
 
     def send_obj(self, obj=Union[BallsPositionsMessage, JumpMessage, TargetsForBallsMessage]):
+        print("UDPHandler: send_obj, target sockets len:", len(self._target_sockets))
         obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
         for socket in self._target_sockets:
             socket.write(obj_in_bytes)

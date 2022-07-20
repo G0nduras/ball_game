@@ -8,17 +8,17 @@ class NetAddress:
         self._host = host
         self._port = port
 
-    def connect_upd_socket(self, q_object) -> QUdpSocket:
+    def connect_upd_socket(self, q_object: QObject) -> QUdpSocket:
         socket = QUdpSocket(q_object)
         socket.connectToHost(self._host, self._port)
         return socket
 
-    def bind_upd_socket(self, q_object) -> QUdpSocket:
+    def bind_upd_socket(self, q_object: QObject) -> QUdpSocket:
         socket = QUdpSocket(q_object)
         socket.bind(self._host, self._port)
         return socket
 
-    def connect_tcp_socket(self, q_object) -> QTcpSocket:
+    def connect_tcp_socket(self, q_object: QObject) -> QTcpSocket:
         socket = QTcpSocket(q_object)
         socket.connectToHost(self._host, self._port)
         return socket

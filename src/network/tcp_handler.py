@@ -37,17 +37,17 @@ class TCPHandler(QTcpServer):
         sender = self.sender()
         data = sender.readAll()
         obj = UDPMessageTranslator.from_bytes(data)
-        print("type obj=", type(obj))
+        print("type obj:", type(obj))
         if isinstance(obj, NewPlayerMessage):
             self.new_player_signal.emit(obj)
         elif isinstance(obj, NewClientMessage):
             self.new_client_signal.emit(obj)
         else:
+            assert isinstance(obj, NewClientInfoMessage)
             self.new_client_info_signal.emit(obj)
 
     def on_socket_change(self, socket_state):
-        print("on_socket_change")
-        print("type socket_state=", type(socket_state))
+        print("on_socket_change, type socket_state:", type(socket_state))
         if socket_state == QAbstractSocket.SocketState.UnconnectedState:
             sender = self.sender()
             self._sockets.remove(sender)
@@ -58,7 +58,7 @@ class TCPHandler(QTcpServer):
         print("len target_net_address", len(self._target_net_addresses))
 
     def send_obj_to_all(self, obj: Union[NewPlayerMessage, NewClientMessage]):
-        print("send_obj_to_all: obj type=", type(obj))
+        print("send_obj_to_all: obj type:", type(obj))
         for target_net_address in self._target_net_addresses:
             obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
             socket = target_net_address.connect_tcp_socket(self)
