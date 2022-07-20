@@ -34,15 +34,6 @@ class Server(QObject):
     @pyqtSlot(NewClientMessage)
     def process_new_client(self, new_client_message: NewClientMessage):
         player_id = self._server_scene.get_new_player_id()
-        self._server_scene.add_player(player=ServerPlayer(players_id=player_id, balls=[ServerBall(
-            x=new_client_message.spawn_x,
-            y=new_client_message.spawn_y,
-            radius=new_client_message.radius,
-            density=self._server_conf.density,
-            resistance_alpha=self._server_conf.resistance_alpha,
-            thrust_force_module=self._server_conf.trust_force_module,
-            jump_impulse_module=self._server_conf.impulse_module,
-        )]))
         self._tcp_handler.send_obj_to_all(new_client_message.to_new_player_message(player_id=player_id))
         self._udp_handler.add_target_address(target_net_address=NetAddress(
             host=QHostAddress(new_client_message.udp_host),
@@ -60,3 +51,12 @@ class Server(QObject):
             player_id=player_id,
             other_players=other_players,
         ))
+        self._server_scene.add_player(player=ServerPlayer(players_id=player_id, balls=[ServerBall(
+            x=new_client_message.spawn_x,
+            y=new_client_message.spawn_y,
+            radius=new_client_message.radius,
+            density=self._server_conf.density,
+            resistance_alpha=self._server_conf.resistance_alpha,
+            thrust_force_module=self._server_conf.trust_force_module,
+            jump_impulse_module=self._server_conf.impulse_module,
+        )]))

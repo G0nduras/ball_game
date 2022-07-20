@@ -44,10 +44,10 @@ class UDPHandler(QObject):
             elif isinstance(obj, TargetsForBallsMessage):
                 self.set_target_signal.emit(obj)
             else:
+                assert isinstance(obj, JumpMessage)
                 self.jump_signal.emit(obj)
 
     def send_obj(self, obj=Union[BallsPositionsMessage, JumpMessage, TargetsForBallsMessage]):
-        print("UDPHandler: send_obj, target sockets len:", len(self._target_sockets))
         obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
         for socket in self._target_sockets:
             socket.write(obj_in_bytes)
