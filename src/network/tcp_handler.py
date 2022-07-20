@@ -1,4 +1,5 @@
-from typing import Union, List
+from typing import Union, List, Dict
+import random
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtNetwork import QTcpSocket, QAbstractSocket, QHostAddress, QTcpServer
 from src.network.new_client_info_message import NewClientInfoMessage
@@ -18,11 +19,11 @@ class TCPHandler(QTcpServer):
             listening_port: int,
     ):
         super().__init__()
-        self._target_net_addresses: List[NetAddress] = []
+        self._target_net_addresses: Dict[str, NetAddress] = {}
 
         self.listen(QHostAddress.SpecialAddress.Any, listening_port)
         self.newConnection.connect(self.new_connection)
-        self._sockets = []
+        self._sockets: List[QTcpSocket] = []
 
     def new_connection(self):
         print("new_connection")
@@ -52,20 +53,29 @@ class TCPHandler(QTcpServer):
             sender = self.sender()
             self._sockets.remove(sender)
 
-    def add_target_address(self, target_net_address: NetAddress):
+    def add_target_address_with_random_key(self, target_net_address: NetAddress):
+        key = random.randint(0, 1e10)
+        while key in self._target_net_addresses:
+            key = random.randint(0, 1e10)
+        self.add_target_address(key=key, target_net_address=target_net_address)
+
+    def add_target_address(self, key: str, target_net_address: NetAddress):
         print("add_target_address host:", target_net_address._host, "port:", target_net_address._port)
-        self._target_net_addresses.append(target_net_address)
+        self._target_net_addresses[key] = target_net_address
         print("len target_net_address", len(self._target_net_addresses))
+
+    def remove_target_address(self, key: str):
+        self._target_net_addresses.pop(key)
 
     def send_obj_to_all(self, obj: Union[NewPlayerMessage, NewClientMessage]):
         print("send_obj_to_all: obj type:", type(obj))
-        for target_net_address in self._target_net_addresses:
+        for target_net_address in self._target_net_addresses.values():
             obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
             socket = target_net_address.connect_tcp_socket(self)
             socket.write(obj_in_bytes)
 
     def send_obj_to_last(self, obj: Union[NewPlayerMessage, NewClientMessage, NewClientInfoMessage]):
-        last_address = self._target_net_addresses[-1]
+        last_address = list(self._target_net_addresses.values())[-1]
         print("send_obj_to_last: obj type:", type(obj), "host:", str(last_address._host), "port:", last_address._port)
         obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
         socket = last_address.connect_tcp_socket(self)

@@ -1,4 +1,5 @@
-from typing import Union, List
+from typing import Union, List, Dict
+import random
 from PyQt6.QtCore import QObject, pyqtSignal, QByteArray
 from PyQt6.QtNetwork import QHostAddress, QUdpSocket
 from src.network.balls_positions import BallsPositionsMessage
@@ -18,8 +19,8 @@ class UDPHandler(QObject):
             listening_port: int,
     ):
         super().__init__()
-        self._target_net_addresses: List[NetAddress] = []
-        self._target_sockets: List[QUdpSocket] = []
+        self._target_net_addresses: Dict[str, NetAddress] = {}
+        self._target_sockets: Dict[str, QUdpSocket] = {}
         self._listening_net_address: NetAddress = NetAddress(
             host=QHostAddress("127.0.0.1"),
             port=listening_port,
@@ -27,11 +28,21 @@ class UDPHandler(QObject):
         self._listening_socket = self._listening_net_address.bind_upd_socket(self)
         self._listening_socket.readyRead.connect(self.receive_bytes)
 
-    def add_target_address(self, target_net_address: NetAddress):
+    def add_target_address_with_random_key(self, target_net_address: NetAddress):
+        key = random.randint(0, 1e10)
+        while key in self._target_net_addresses:
+            key = random.randint(0, 1e10)
+        self.add_target_address(key=key, target_net_address=target_net_address)
+
+    def add_target_address(self, key: str, target_net_address: NetAddress):
         print("UDPHandler: add_target_address, host:", target_net_address._host, "port:", target_net_address._port)
-        self._target_net_addresses.append(target_net_address)
+        self._target_net_addresses[key] = target_net_address
         new_target_socket = target_net_address.connect_upd_socket(self)
-        self._target_sockets.append(new_target_socket)
+        self._target_sockets[key] = new_target_socket
+
+    def remove_target_address(self, key: str):
+        self._target_net_addresses.pop(key)
+        self._target_sockets.pop(key)
 
     def receive_bytes(self):
         while self._listening_socket.hasPendingDatagrams():
@@ -49,5 +60,5 @@ class UDPHandler(QObject):
 
     def send_obj(self, obj=Union[BallsPositionsMessage, JumpMessage, TargetsForBallsMessage]):
         obj_in_bytes = UDPMessageTranslator.to_bytes(obj)
-        for socket in self._target_sockets:
+        for socket in self._target_sockets.values():
             socket.write(obj_in_bytes)

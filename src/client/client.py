@@ -29,11 +29,11 @@ class Client(QObject):
 
         self._udp_handler: UDPHandler = UDPHandler(listening_port=client_conf.client_udp_port)
         self._tcp_handler: TCPHandler = TCPHandler(listening_port=client_conf.client_tcp_port)
-        self._udp_handler.add_target_address(NetAddress(
+        self._udp_handler.add_target_address_with_random_key(NetAddress(
             host=QHostAddress(client_conf.server_host),
             port=client_conf.server_udp_port,
         ))
-        self._tcp_handler.add_target_address(NetAddress(
+        self._tcp_handler.add_target_address_with_random_key(NetAddress(
             host=QHostAddress(client_conf.server_host),
             port=client_conf.server_tcp_port,
         ))

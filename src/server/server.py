@@ -35,11 +35,11 @@ class Server(QObject):
     def process_new_client(self, new_client_message: NewClientMessage):
         player_id = self._server_scene.get_new_player_id()
         self._tcp_handler.send_obj_to_all(new_client_message.to_new_player_message(player_id=player_id))
-        self._udp_handler.add_target_address(target_net_address=NetAddress(
+        self._udp_handler.add_target_address(key=player_id, target_net_address=NetAddress(
             host=QHostAddress(new_client_message.udp_host),
             port=new_client_message.udp_port,
         ))
-        self._tcp_handler.add_target_address(target_net_address=NetAddress(
+        self._tcp_handler.add_target_address(key=player_id, target_net_address=NetAddress(
             host=QHostAddress(new_client_message.tcp_host),
             port=new_client_message.tcp_port,
         ))
