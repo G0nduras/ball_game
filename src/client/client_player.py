@@ -5,8 +5,8 @@ from src.client.client_ball import ClientBall
 class ClientPlayer:
     def __init__(
             self,
-            players_id: int,
+            player_id: int,
             balls: List[ClientBall]
     ):
-        self.players_id = players_id
+        self.player_id = player_id
         self.balls: List[ClientBall] = balls

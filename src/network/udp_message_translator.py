@@ -6,7 +6,7 @@ from src.network.jump_message import JumpMessage
 from src.network.targets_for_balls_message import TargetsForBallsMessage
 
 
-class UDPMessageTranslator:
+class MessageTranslator:
     @staticmethod
     def to_bytes(obj: Any) -> bytes:
         bytes_io = BytesIO()

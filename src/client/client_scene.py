@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from PyQt6.QtCore import QPointF, Qt, pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QGraphicsScene
 from src.network.balls_positions import BallsPositionsMessage, BallPosition
@@ -18,7 +18,7 @@ class ClientScene(QGraphicsScene):
             player_id: int
     ):
         super().__init__()
-        self._client_players: List[ClientPlayer] = []
+        self._client_players: Dict[int, ClientPlayer] = {}
         self._selected_balls: List[ClientBall] = []
         self._selecting_rect: SelectingRect = SelectingRect()
         self._player_id = player_id
@@ -26,9 +26,16 @@ class ClientScene(QGraphicsScene):
         self._selecting_rect.add_rect_to_scene(self)
 
     def add_player(self, player: ClientPlayer):
-        self._client_players.append(player)
+        player_id = player.player_id
+        self._client_players[player_id] = player
         for ball in player.balls:
             ball.add_ball_to_scene(self)
+
+    def delete_player_with_ball(self, player_id):
+        player = self._client_players[player_id]
+        for ball in player.balls:
+            self.removeItem(ball)
+        self._client_players.pop(player_id)
 
     def key_press_event(self, event):
         if event.key() == Qt.Key.Key_Space:
@@ -50,7 +57,7 @@ class ClientScene(QGraphicsScene):
         if event.button() == Qt.MouseButton.LeftButton:
             player = self._client_players[self._player_id]
             if self._selecting_rect.is_small():
-                for player in self._client_players:
+                for player in self._client_players.values():
                     for ball in player.balls:
                         if ball.is_clicked(mouse_position=QPointF(event.pos())):
                             self._selected_balls = [ball]
@@ -59,7 +66,7 @@ class ClientScene(QGraphicsScene):
                     self._selected_balls = []
             else:
                 self._selected_balls = self._selecting_rect.filter_selected_balls(player.balls)
-            for player in self._client_players:
+            for player in self._client_players.values():
                 for ball in player.balls:
                     ball.set_draw_method(is_selected=ball in self._selected_balls)
             self._selecting_rect.clear_rect()

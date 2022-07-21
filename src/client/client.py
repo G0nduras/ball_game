@@ -12,6 +12,7 @@ from src.client.client_player import ClientPlayer
 from src.client.client_scene import ClientScene
 from src.network.net_address import NetAddress
 from src.network.new_client_info_message import NewClientInfoMessage
+from src.network.client_dicsonnected_message import ClientDisconnectedMessage
 from src.network.new_client_message import NewClientMessage
 from src.network.new_player_message import NewPlayerMessage
 from src.network.tcp_handler import TCPHandler
@@ -50,20 +51,26 @@ class Client(QObject):
             udp_host=self._client_conf.client_host,
             udp_port=self._client_conf.client_udp_port,
         ))
+        self._tcp_handler.client_disconnected_signal.connect(self.process_delete)
         self._widget = BallWidget()
         self._widget.setWindowTitle("BallGame")
         self._widget.setMouseTracking(True)
         self._widget.showFullScreen()
-        widget_size = self._widget.size()
-        self._widget.setSceneRect(QRectF(QPointF(0, 0), QSizeF(widget_size)))
+        self._widget.setSceneRect(QRectF(QPointF(0, 0), QSizeF(self._widget.size())))
         self._widget.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContentsOnFirstShow)
         self._widget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._widget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._widget.client_is_disconnected.connect(self.client_is_disconnected)
+
+    @pyqtSlot()
+    def client_is_disconnected(self):
+        if self._client_scene._player_id is not None:
+            self._tcp_handler.send_obj_to_all(ClientDisconnectedMessage(player_id=self._client_scene._player_id))
 
     @pyqtSlot(NewPlayerMessage)
     def process_new_player(self, new_player: NewPlayerMessage):
         self._client_scene.add_player(ClientPlayer(
-            players_id=new_player.player_id,
+            player_id=new_player.player_id,
             balls=[
                 ClientBall(
                     x=new_player.spawn_x,
@@ -79,7 +86,7 @@ class Client(QObject):
         self._client_scene = ClientScene(player_id=new_client_info_message.player_id)
 
         self._client_scene.add_player(player=ClientPlayer(
-            players_id=new_client_info_message.player_id,
+            player_id=new_client_info_message.player_id,
             balls=[ClientBall(
                 x=self._client_conf.ball_spawn_x,
                 y=self._client_conf.ball_spawn_y,
@@ -89,7 +96,7 @@ class Client(QObject):
         ))
 
         for player in new_client_info_message.other_players:
-            client_player = ClientPlayer(players_id=new_client_info_message.player_id, balls=[ClientBall(
+            client_player = ClientPlayer(player_id=new_client_info_message.player_id, balls=[ClientBall(
                 x=player.spawn_x,
                 y=player.spawn_y,
                 radius=player.radius,
@@ -102,3 +109,7 @@ class Client(QObject):
         self._client_scene.jump_signal.connect(self._udp_handler.send_obj)
         self._client_scene.set_target_signal.connect(self._udp_handler.send_obj)
         self._udp_handler.set_pos_signal.connect(self._client_scene.get_balls_position)
+
+    @pyqtSlot(ClientDisconnectedMessage)
+    def process_delete(self, client_disconnected_message: ClientDisconnectedMessage):
+        self._client_scene.delete_player_with_ball(player_id=client_disconnected_message.player_id)

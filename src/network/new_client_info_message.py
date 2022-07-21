@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from network.new_player_message import NewPlayerMessage
+from src.network.new_player_message import NewPlayerMessage
 
 
 @dataclass

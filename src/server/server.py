@@ -6,6 +6,7 @@ from PyQt6.QtCore import pyqtSlot, QObject
 from PyQt6.QtNetwork import QHostAddress
 from src.network.net_address import NetAddress
 from src.network.new_client_info_message import NewClientInfoMessage
+from src.network.client_dicsonnected_message import ClientDisconnectedMessage
 from src.network.tcp_handler import TCPHandler
 from src.network.udp_handler import UDPHandler
 from src.network.new_client_message import NewClientMessage
@@ -30,6 +31,7 @@ class Server(QObject):
         self._udp_handler.set_target_signal.connect(self._server_scene.set_target_for_selected_balls)
         self._server_scene.set_pos_signal.connect(self._udp_handler.send_obj)
         self._tcp_handler.new_client_signal.connect(self.process_new_client)
+        self._tcp_handler.client_disconnected_signal.connect(self.process_delete)
 
     @pyqtSlot(NewClientMessage)
     def process_new_client(self, new_client_message: NewClientMessage):
@@ -45,13 +47,13 @@ class Server(QObject):
         ))
         other_players = [
             player.create_new_player_message()
-            for player in self._server_scene._server_players
+            for player in self._server_scene._server_players.values()
         ]
         self._tcp_handler.send_obj_to_last(NewClientInfoMessage(
             player_id=player_id,
             other_players=other_players,
         ))
-        self._server_scene.add_player(player=ServerPlayer(players_id=player_id, balls=[ServerBall(
+        self._server_scene.add_player(player=ServerPlayer(player_id=player_id, balls=[ServerBall(
             x=new_client_message.spawn_x,
             y=new_client_message.spawn_y,
             radius=new_client_message.radius,
@@ -61,3 +63,10 @@ class Server(QObject):
             jump_impulse_module=self._server_conf.impulse_module,
             ball_color=new_client_message.default_color,
         )]))
+
+    @pyqtSlot(ClientDisconnectedMessage)
+    def process_delete(self, client_disconnected_message: ClientDisconnectedMessage):
+        self._server_scene.delete_player_with_ball(player_id=client_disconnected_message.player_id)
+        self._tcp_handler.remove_target_address(key=client_disconnected_message.player_id)
+        self._udp_handler.remove_target_address(key=client_disconnected_message.player_id)
+        self._tcp_handler.send_obj_to_all(client_disconnected_message)

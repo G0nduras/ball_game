@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from math import sqrt
 from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QVector2D
@@ -26,15 +26,22 @@ class ServerScene(QGraphicsScene):
         self.timer = QTimer()
         self.timer.timeout.connect(self.on_timer_tick)
         self.timer.start(round(ServerScene.MS_IN_S / frame_per_second))
-        self._server_players: List[ServerPlayer] = []
+        self._server_players: Dict[int, ServerPlayer] = {}
 
     def get_new_player_id(self):
         return len(self._server_players)
 
     def add_player(self, player: ServerPlayer):
-        self._server_players.append(player)
+        player_id = player.player_id
+        self._server_players[player_id] = player
         for ball in player.balls:
             ball.add_ball_to_scene(self)
+
+    def delete_player_with_ball(self, player_id):
+        player = self._server_players[player_id]
+        for ball in player.balls:
+            self.removeItem(ball)
+        self._server_players.pop(player_id)
 
     @pyqtSlot(JumpMessage)
     def set_jump(self, jump_message: JumpMessage):
@@ -56,7 +63,7 @@ class ServerScene(QGraphicsScene):
     def _list_all_balls(self) -> List[ServerBall]:
         return [
             ball
-            for player in self._server_players
+            for player in self._server_players.values()
             for ball in player.balls
         ]
 
@@ -88,7 +95,7 @@ class ServerScene(QGraphicsScene):
                     ball_2.add_impulse(delta_impulse_2)
 
     def _update_ball_positions(self):
-        for player in self._server_players:
+        for player in self._server_players.values():
             for ball in player.balls:
                 force = ball.calculate_sum_force()
                 assert isinstance(force, QVector2D), type(force)

@@ -1,11 +1,13 @@
 from typing import Optional
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene
 from client_scene import ClientScene
 
 
 class BallWidget(QGraphicsView):
+    client_is_disconnected = pyqtSignal()
+
     def __init__(
             self,
     ):
@@ -18,14 +20,19 @@ class BallWidget(QGraphicsView):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
+            self.client_is_disconnected.emit()
             self.close()
-        self._scene.key_press_event(event)
+        if self._scene is not None:
+            self._scene.key_press_event(event)
 
     def mouseMoveEvent(self, event):
-        self._scene.mouse_move_event(event)
+        if self._scene is not None:
+            self._scene.mouse_move_event(event)
 
     def mouseReleaseEvent(self, event):
-        self._scene.mouse_release_event(event)
+        if self._scene is not None:
+            self._scene.mouse_release_event(event)
 
     def mousePressEvent(self, event):
-        self._scene.mouse_press_event(event)
+        if self._scene is not None:
+            self._scene.mouse_press_event(event)
